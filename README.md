@@ -1,152 +1,102 @@
-AAA‑Quality RPG Inventory & Crafting System
+# AAA‑Quality RPG Inventory & Crafting System – v2.2  
 
-Modern C++17, header‑only, zero third‑party dependencies
+**Modern C++17, header‑only, zero third‑party dependencies**  
 
-Table of Contents
+---
 
-Project Overview
-Why a Home‑Made JSON Parser?
-Key Features
-Directory Layout
-Core Modules
-result.hpp – Result<T> type
-json.hpp – Minimal JSON implementation
-logger.hpp – Thread‑safe logging
-enums.hpp – Enums & helper functions
-item.hpp – Item data model & JSON conversion
-item_factory.hpp – Template‑based random item creation
-crafting.hpp – Data‑driven recipes
-inventory.hpp – Inventory management, equipment, crafting integration, persistence
-main.cpp – Demo command‑line UI
-Building the Project
-Running the Demo
-Extending the System
-License
-Author & Contact
-Support the Project
-Project Overview
+## Table of Contents
+1. [Project Overview](#project-overview)  
+2. [Why a Home‑Made JSON Parser?](#why-a-home‑made-json-parser)  
+3. [Key Features](#key-features)  
+4. [Directory Layout](#directory-layout)  
+5. [Core Modules](#core-modules)  
+   - [result.hpp – `Result<T>` type](#resulthpp---resultt-type)  
+   - [json.hpp – Minimal JSON implementation](#jsonhpp---minimal-json-implementation)  
+   - [logger.hpp – Thread‑safe logging](#loggerhpp---thread‑safe-logging)  
+   - [enums.hpp – Enums & helper functions](#enumshpp---enums--helper-functions)  
+   - [item.hpp – Item data model & JSON conversion](#itemhpp---item-data-model--json-conversion)  
+   - [item_factory.hpp – Template‑based random item creation](#item_factoryhpp---template‑based-random-item-creation)  
+   - [crafting.hpp – Data‑driven recipes](#craftinghpp---data‑driven-recipes)  
+   - [inventory.hpp – Inventory management, equipment, crafting integration, persistence](#inventoryhpp---inventory-management-equipment-crafting-integration-persistence)  
+   - [main.cpp – Demo command‑line UI](#maincpp---demo-command‑line-ui)  
+6. [Building the Project](#building-the-project)  
+7. [Running the Demo](#running-the-demo)  
+8. [Extending the System](#extending-the-system)  
+9. [License](#license)  
+10. [Author & Contact](#author--contact)  
+11. [Support the Project](#support-the-project)  
 
-This repository implements a complete RPG inventory and crafting system suitable for hobby projects, academic assignments, or as a foundation for larger games. The code is written in clean, modern C++17, split into logical header files, and does not rely on any external libraries.
+---
 
-All data (item templates and crafting recipes) are stored as JSON files, parsed by a tiny self‑written JSON library that lives in
-src/json.hpp
+## Project Overview
+This repository implements a **complete RPG inventory and crafting system** suitable for hobby projects, academic assignments, or as a foundation for larger games. The code is written in clean, modern C++17, split into logical header files, and **does not rely on any external libraries**.  
 
-. The system supports:
+All data (item templates and crafting recipes) are stored as JSON files, parsed by a tiny self‑written JSON library that lives in `src/json.hpp`. The system supports:
 
-Stacking, weight limits, and slot limits.
-Equip/unequip logic with dedicated equipment slots.
-Randomised item generation based on template definitions and rarity scaling.
-Data‑driven crafting with ingredient validation.
-Full save/load functionality using JSON.
-A minimal console UI (
-src/main.cpp
+* Stacking, weight limits, and slot limits.  
+* Equip/unequip logic with dedicated equipment slots.  
+* Randomised item generation based on template definitions and rarity scaling.  
+* Data‑driven crafting with ingredient validation.  
+* Full save/load functionality using JSON.  
 
-) demonstrates the workflow and can be replaced with any rendering layer you prefer.
+A minimal console UI (`src/main.cpp`) demonstrates the workflow and can be replaced with any rendering layer you prefer.
 
-Why a Home‑Made JSON Parser?
+---
 
-Portability – No need to ship a bulky third‑party header (
-nlohmann::json
+## Why a Home‑Made JSON Parser?
+* **Portability** – No need to ship a bulky third‑party header (`nlohmann::json` is ~30 kB). The parser fits comfortably in a single header and compiles on every C++17 compiler.  
+* **Educational value** – The code shows how a recursive‑descent JSON parser works, which is useful for students and developers learning parsers.  
+* **Full control** – Only the features required by the inventory system are exposed (`parse`, `dump`, `operator[]`, `value<T>()`). Unused functionality is omitted, keeping compile times low.  
+* **Zero runtime dependencies** – The project can be compiled on constrained platforms (embedded Linux, Windows Subsystem for Linux, macOS, etc.) without extra packages.  
 
-is ~30 kB). The parser fits comfortably in a single header and compiles on every C++17 compiler.
-Educational value – The code shows how a recursive‑descent JSON parser works, which is useful for students and developers learning parsers.
-Full control – Only the features required by the inventory system are exposed (
-parse
+The parser is intentionally **minimal but robust**: it handles objects, arrays, numbers, booleans, null, and proper string escaping.
 
-,
-dump
+---
 
-,
-operator[]
+## Key Features
+|
+ Feature 
+|
+ Description 
+|
+|
+---------
+|
+-------------
+|
+| **Self‑contained** – only the C++17 standard library is needed. |
+| **Result\<T\>** – functional‑style error handling without exceptions. |
+| **Thread‑safe logger** – console + optional file output (`Log::info/warn/error`). |
+| **Rarity system** – stats scale with rarity; colour‑coded output for terminal. |
+| **Stackable items** – automatic merging of stacks, custom `maxStack`. |
+| **Weight & slot limits** – enforced on every add/remove operation. |
+| **Equipment slots** – head, chest, legs, weapon, shield, accessory; auto‑detect based on item ID. |
+| **Data‑driven crafting** – recipes loaded from JSON; ingredient checking and consumption. |
+| **Persistence** – inventory and equipped gear can be saved to / loaded from a JSON file. |
+| **CMake build** – simple `CMakeLists.txt` for cross‑platform compilation. |
+| **MIT License** – free to use, modify, and redistribute. |
 
-,
-value<T>()
+---
 
-). Unused functionality is omitted, keeping compile times low.
-Zero runtime dependencies – The project can be compiled on constrained platforms (embedded Linux, Windows Subsystem for Linux, macOS, etc.) without extra packages.
-The parser is intentionally minimal but robust: it handles objects, arrays, numbers, booleans, null, and proper string escaping.
+## Directory Layout
 
-Key Features
+. ├─ .gitignore ├─ CMakeLists.txt ├─ README.md ├─ data │ ├─ recipes.json ← crafting recipes │ └─ templates.json ← base item definitions └─ src ├─ crafting.hpp ├─ enums.hpp ├─ inventory.hpp ├─ item.hpp ├─ item_factory.hpp ├─ json.hpp ├─ logger.hpp ├─ main.cpp └─ result.hpp
 
-Feature	Description
-Self‑contained – only the C++17 standard library is needed.	
-Result<T> – functional‑style error handling without exceptions.	
-Thread‑safe logger – console + optional file output (
-Log::info/warn/error
 
-).	
-Rarity system – stats scale with rarity; colour‑coded output for terminal.	
-Stackable items – automatic merging of stacks, custom
-maxStack
+*All source files are header‑only except `main.cpp`, which contains the demonstration UI.*
 
-.	
-Weight & slot limits – enforced on every add/remove operation.	
-Equipment slots – head, chest, legs, weapon, shield, accessory; auto‑detect based on item ID.	
-Data‑driven crafting – recipes loaded from JSON; ingredient checking and consumption.	
-Persistence – inventory and equipped gear can be saved to / loaded from a JSON file.	
-CMake build – simple
-CMakeLists.txt
+---
 
-for cross‑platform compilation.	
-MIT License – free to use, modify, and redistribute.	
-Directory Layout
+## Core Modules
 
-.
-├─ .gitignore
-├─ CMakeLists.txt
-├─ README.md
-├─ data
-│   ├─ recipes.json      ← crafting recipes
-│   └─ templates.json    ← base item definitions
-└─ src
-    ├─ crafting.hpp
-    ├─ enums.hpp
-    ├─ inventory.hpp
-    ├─ item.hpp
-    ├─ item_factory.hpp
-    ├─ json.hpp
-    ├─ logger.hpp
-    ├─ main.cpp
-    └─ result.hpp
+### `result.hpp` – `Result<T>` type
+* Stores either a value (`std::optional<T>`) or an error string.  
+* Implicit conversion to `bool` (`true` = success).  
+* Static factories: `Result<T>::ok(value)` and `Result<T>::err(message)`.  
+* Specialized for `void` to represent success/failure without a value.  
 
-All source files are header‑only except
-main.cpp
-
-, which contains the demonstration UI.
-
-Core Modules
-
-result.hpp
-
-–
-Result<T>
-
-type
-
-Stores either a value (
-std::optional<T>
-
-) or an error string.
-Implicit conversion to
-bool
-
-(
-true
-
-= success).
-Static factories:
-Result<T>::ok(value)
-
-and
-Result<T>::err(message)
-
-.
-Specialized for
-void
-
-to represent success/failure without a value.
-Usage pattern:
-
+**Usage pattern**
+```cpp
 Result<Item> r = factory.create("iron_sword");
 if (!r) { std::cerr << r.error(); }
 else     { Item sword = r.value(); }
