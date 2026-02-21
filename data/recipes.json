@@ -1,1 +1,114 @@
+[
+  {
+    "resultId": "iron_ingot",
+    "resultCount": 1,
+    "ingredients": {
+      "iron_ore": 2
+    }
+  },
+  {
+    "resultId": "steel_ingot",
+    "resultCount": 1,
+    "ingredients": {
+      "iron_ingot": 2,
+      "coal": 1
+    }
+  },
+  {
+    "resultId": "gold_ingot",
+    "resultCount": 1,
+    "ingredients": {
+      "gold_ore": 2
+    }
+  },
 
+  {
+    "resultId": "iron_sword",
+    "resultCount": 1,
+    "ingredients": {
+      "iron_ingot": 2,
+      "wood": 1
+    }
+  },
+  {
+    "resultId": "steel_sword",
+    "resultCount": 1,
+    "ingredients": {
+      "steel_ingot": 2,
+      "wood": 1
+    }
+  },
+  {
+    "resultId": "bow",
+    "resultCount": 1,
+    "ingredients": {
+      "wood": 2,
+      "leather": 1
+    }
+  },
+  {
+    "resultId": "shield_wooden",
+    "resultCount": 1,
+    "ingredients": {
+      "wood": 3,
+      "leather": 1
+    }
+  },
+
+  {
+    "resultId": "iron_helmet",
+    "resultCount": 1,
+    "ingredients": {
+      "iron_ingot": 2
+    }
+  },
+  {
+    "resultId": "iron_chestplate",
+    "resultCount": 1,
+    "ingredients": {
+      "iron_ingot": 3
+    }
+  },
+  {
+    "resultId": "iron_leggings",
+    "resultCount": 1,
+    "ingredients": {
+      "iron_ingot": 2,
+      "leather": 1
+    }
+  },
+
+  {
+    "resultId": "health_potion",
+    "resultCount": 1,
+    "ingredients": {
+      "herb": 3,
+      "water": 1
+    }
+  },
+  {
+    "resultId": "mana_potion",
+    "resultCount": 1,
+    "ingredients": {
+      "herb": 2,
+      "water": 1
+    }
+  },
+
+  {
+    "resultId": "ring_of_strength",
+    "resultCount": 1,
+    "ingredients": {
+      "gold_ingot": 2,
+      "gem": 1
+    }
+  },
+  {
+    "resultId": "amulet_of_magic",
+    "resultCount": 1,
+    "ingredients": {
+      "gold_ingot": 2,
+      "gem": 2
+    }
+  }
+]
