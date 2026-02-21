@@ -561,7 +561,7 @@ file for full terms.
 Author & Contact
 
 Name: s.a.aris
-E‑mail: s.a.aris@proton.me
+E‑mail: solsus.aris@proton.me
 GitHub: https://github.com/sa-aris
 
 Feel free to open issues, submit pull requests, or ask questions on the repository.
