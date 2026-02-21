@@ -1,1 +1,230 @@
+[
+  {
+    "id": "iron_ore",
+    "name": "Iron Ore",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 2 }
+  },
+  {
+    "id": "coal",
+    "name": "Coal",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 1 }
+  },
+  {
+    "id": "wood",
+    "name": "Wood Log",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 3 }
+  },
+  {
+    "id": "leather",
+    "name": "Leather",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 1 }
+  },
+  {
+    "id": "herb",
+    "name": "Healing Herb",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 1 }
+  },
+  {
+    "id": "water",
+    "name": "Water Flask",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 10,
+    "data": { "weight": 2 }
+  },
+  {
+    "id": "gold_ore",
+    "name": "Gold Ore",
+    "type": "Material",
+    "rarity": "Uncommon",
+    "levelReq": 3,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 2 }
+  },
+  {
+    "id": "gem",
+    "name": "Precious Gem",
+    "type": "Material",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 5,
+    "data": { "weight": 1 }
+  },
+  {
+    "id": "iron_ingot",
+    "name": "Iron Ingot",
+    "type": "Material",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 2 }
+  },
+  {
+    "id": "steel_ingot",
+    "name": "Steel Ingot",
+    "type": "Material",
+    "rarity": "Uncommon",
+    "levelReq": 2,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 2 }
+  },
+  {
+    "id": "gold_ingot",
+    "name": "Gold Ingot",
+    "type": "Material",
+    "rarity": "Uncommon",
+    "levelReq": 3,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "weight": 2 }
+  },
 
+  /* ---------- WEAPONS ---------- */
+  {
+    "id": "iron_sword",
+    "name": "Iron Sword",
+    "type": "Weapon",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "damage": 8, "durability": 100, "weight": 5 }
+  },
+  {
+    "id": "steel_sword",
+    "name": "Steel Sword",
+    "type": "Weapon",
+    "rarity": "Uncommon",
+    "levelReq": 2,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "damage": 12, "durability": 120, "weight": 6 }
+  },
+  {
+    "id": "bow",
+    "name": "Wooden Bow",
+    "type": "Weapon",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "damage": 7, "durability": 80, "weight": 4 }
+  },
+  {
+    "id": "shield_wooden",
+    "name": "Wooden Shield",
+    "type": "Weapon",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "damage": 2, "durability": 150, "weight": 7 }
+  },
+
+  /* ---------- ARMOR ---------- */
+  {
+    "id": "iron_helmet",
+    "name": "Iron Helmet",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "defense": 3, "weight": 4 }
+  },
+  {
+    "id": "iron_chestplate",
+    "name": "Iron Chestplate",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "defense": 5, "weight": 8 }
+  },
+  {
+    "id": "iron_leggings",
+    "name": "Iron Leggings",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "defense": 4, "weight": 6 }
+  },
+
+  /* ---------- CONSUMABLES ---------- */
+  {
+    "id": "health_potion",
+    "name": "Health Potion",
+    "type": "Consumable",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "healAmount": 30, "weight": 1 }
+  },
+  {
+    "id": "mana_potion",
+    "name": "Mana Potion",
+    "type": "Consumable",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "healAmount": 20, "weight": 1 }
+  },
+
+  /* ---------- MISC (ACCESSORIES) ---------- */
+  {
+    "id": "ring_of_strength",
+    "name": "Ring of Strength",
+    "type": "Misc",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "weight": 1 }
+  },
+  {
+    "id": "amulet_of_magic",
+    "name": "Amulet of Magic",
+    "type": "Misc",
+    "rarity": "Epic",
+    "levelReq": 7,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "weight": 1 }
+  }
+]
