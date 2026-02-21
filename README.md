@@ -1,4 +1,4 @@
-# AAA‑Quality RPG Inventory & Crafting System – v2.2  
+# AAA‑Quality RPG Inventory & Crafting System
 
 **Modern C++17, header‑only, zero third‑party dependencies**  
 
@@ -567,5 +567,8 @@ GitHub: https://github.com/sa-aris
 Feel free to open issues, submit pull requests, or ask questions on the repository.
 
 Support the Project
-
 This project is especially aimed at students, beginners, and developers with limited resources. If you have the means, you can support my ongoing work by buying me a coffee. Anyone who uses my project is, in my eyes, already treating me to a coffee. Therefore, any donation you make will go solely toward enabling more projects like this one. Thank you for your generosity and for sharing the vision!
+
+Your contribution, no matter how small, helps keep the code free, open, and continuously improving.
+
+Happy coding!
