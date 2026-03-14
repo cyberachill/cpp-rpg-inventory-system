@@ -49,17 +49,20 @@
       { "id": "iron_chestplate",        "weight": 15, "minQty": 1, "maxQty": 1 },
       { "id": "iron_helmet",            "weight": 15, "minQty": 1, "maxQty": 1 },
       { "id": "mana_potion",            "weight": 10, "minQty": 1, "maxQty": 2 },
-      { "id": "enchanting_stone",       "weight":  5, "minQty": 1, "maxQty": 1 }
+      { "id": "enchanting_stone",            "weight":  5, "minQty": 1, "maxQty": 1 },
+      { "id": "recipe_scroll_steel_sword",    "weight":  3, "minQty": 1, "maxQty": 1 },
+      { "id": "recipe_scroll_upgrade_stone",  "weight":  3, "minQty": 1, "maxQty": 1 }
     ]
   },
   {
     "name": "dragon_hoard",
     "rolls": 4,
     "entries": [
-      { "id": "gem",             "weight": 25, "minQty": 1, "maxQty": 3 },
-      { "id": "gold_ingot",      "weight": 30, "minQty": 2, "maxQty": 4 },
-      { "id": "steel_sword",     "weight": 20, "minQty": 1, "maxQty": 1 },
-      { "id": "enchanting_crystal","weight":10, "minQty": 1, "maxQty": 1 }
+      { "id": "gem",                              "weight": 25, "minQty": 1, "maxQty": 3 },
+      { "id": "gold_ingot",                       "weight": 30, "minQty": 2, "maxQty": 4 },
+      { "id": "steel_sword",                      "weight": 20, "minQty": 1, "maxQty": 1 },
+      { "id": "enchanting_crystal",               "weight": 10, "minQty": 1, "maxQty": 1 },
+      { "id": "recipe_scroll_enchanting_crystal", "weight":  5, "minQty": 1, "maxQty": 1 }
     ]
   }
 ]

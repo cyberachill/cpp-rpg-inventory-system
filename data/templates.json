@@ -347,5 +347,47 @@
     "stackSize": 1,
     "maxStack": 20,
     "data": { "repairAmount": 0, "weight": 1 }
+  },
+
+  /* ---------- RECIPE SCROLLS ---------- */
+  {
+    "id": "recipe_scroll_steel_sword",
+    "name": "Recipe: Steel Sword",
+    "type": "Misc",
+    "rarity": "Uncommon",
+    "levelReq": 2,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+  {
+    "id": "recipe_scroll_enchanting_crystal",
+    "name": "Recipe: Enchanting Crystal",
+    "type": "Misc",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+  {
+    "id": "recipe_scroll_health_potion",
+    "name": "Recipe: Health Potion",
+    "type": "Misc",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+  {
+    "id": "recipe_scroll_upgrade_stone",
+    "name": "Recipe: Upgrade Stone",
+    "type": "Misc",
+    "rarity": "Uncommon",
+    "levelReq": 2,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "repairAmount": 0, "weight": 1 }
   }
 ]
