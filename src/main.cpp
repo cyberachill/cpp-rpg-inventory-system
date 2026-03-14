@@ -2,6 +2,7 @@
 #include "item_factory.hpp"
 #include "crafting.hpp"
 #include "shop.hpp"
+#include "loot_table.hpp"
 #include "logger.hpp"
 
 #include <iostream>
@@ -12,11 +13,12 @@
 
 int main() {
     Log::setFile("game.log");               // isteğe bağlı dosya logu
-    ItemFactory   factory;
-    CraftingSystem crafting;
-    Shop          shop;
-    std::mt19937  rng(std::random_device{}());
-    int           playerGold = 200;
+    ItemFactory      factory;
+    CraftingSystem   crafting;
+    Shop             shop;
+    LootTableManager lootMgr;
+    std::mt19937     rng(std::random_device{}());
+    int              playerGold = 200;
 
     if (auto r = factory.loadTemplates("templates.json"); !r) {
         Log::error("Cannot continue without item templates: " + r.error());
@@ -26,6 +28,9 @@ int main() {
         Log::error("Cannot continue without recipes: " + r.error());
         return 1;
     }
+    // loot tables are optional — warn but continue if missing
+    if (auto r = lootMgr.loadFromFile("loot_tables.json"); !r)
+        Log::warn("Loot tables not loaded: " + r.error());
 
     Inventory inv(30, 300);                  // 30 slot, 300 ağırlık limiti
     int playerLevel = 5;
@@ -47,6 +52,7 @@ int main() {
         std::cout << "12) Visit shop (browse / buy)\n";
         std::cout << "13) Sell item\n";
         std::cout << "14) Restock shop\n";
+        std::cout << "15) Open loot table (goblin/bandit/dungeon_chest/dragon_hoard)\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -215,6 +221,29 @@ int main() {
                     }
                 } else {
                     std::cout << "Item not found in inventory.\n";
+                }
+                break;
+            }
+            case 15: {  // loot table roll
+                std::cout << "Enter loot table name (goblin_loot / bandit_loot / dungeon_chest / dragon_hoard): ";
+                std::string tname;
+                std::getline(std::cin, tname);
+                if (!lootMgr.has(tname)) {
+                    std::cout << "Unknown loot table '" << tname << "'\n";
+                    break;
+                }
+                auto dropped = lootMgr.rollItems(tname, factory, rng, playerLevel);
+                if (dropped.empty()) {
+                    std::cout << "Nothing dropped.\n";
+                } else {
+                    std::cout << "You found:\n";
+                    for (auto& item : dropped) {
+                        auto addRes = inv.addItem(item);
+                        if (!addRes)
+                            std::cout << "  (dropped on floor — no space) " << item.getDescription() << "\n";
+                        else
+                            std::cout << "  + " << item.getDescription() << "\n";
+                    }
                 }
                 break;
             }
