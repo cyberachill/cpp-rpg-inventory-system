@@ -318,44 +318,115 @@ public:
     }
 
     // -----------------------------------------------------------------
-    //  Crafting – uses ItemFactory + CraftingSystem
+    //  Crafting – uses ItemFactory + CraftingSystem + CraftingMastery
     // -----------------------------------------------------------------
-    Result<void> craft(const std::string& resultId,
-                       ItemFactory& factory,
-                       const CraftingSystem& crafting,
-                       int playerLevel = 1) {
-        const Recipe* rec = crafting.get(resultId);
-        if (!rec) return Result<void>::err("no recipe for '" + resultId + "'");
+    struct CraftResult {
+        bool         success{false};
+        CraftQuality quality{CraftQuality::Normal};
+        bool         leveledUp{false};
+        std::string  errorMsg;
+    };
 
-        // check ingredient availability
-        for (auto& [ingId, qty] : rec->ingredients) {
-            if (count(ingId) < qty)
-                return Result<void>::err("missing ingredient '" + ingId + "' (need " + std::to_string(qty) + ")");
+    CraftResult craft(const std::string& resultId,
+                      ItemFactory&      factory,
+                      const CraftingSystem& crafting,
+                      CraftingMastery&  mastery,
+                      std::mt19937&     rng,
+                      int               playerLevel = 1)
+    {
+        CraftResult out;
+        const Recipe* rec = crafting.get(resultId);
+        if (!rec) { out.errorMsg = "no recipe for '" + resultId + "'"; return out; }
+
+        // level check
+        if (playerLevel < rec->levelReq) {
+            out.errorMsg = "requires player level " + std::to_string(rec->levelReq);
+            return out;
+        }
+        // mastery check
+        if (mastery.level(rec->category) < rec->masteryReq) {
+            out.errorMsg = "requires " + rec->category + " mastery level "
+                           + std::to_string(rec->masteryReq);
+            return out;
         }
 
-        // create product
+        // ingredient check
+        for (auto& [ingId, qty] : rec->ingredients) {
+            if (count(ingId) < qty) {
+                out.errorMsg = "missing '" + ingId + "' (need " + std::to_string(qty) + ")";
+                return out;
+            }
+        }
+
+        // create product template
         auto prodRes = factory.create(resultId, playerLevel);
-        if (!prodRes) return Result<void>::err("factory failed: " + prodRes.error());
+        if (!prodRes) { out.errorMsg = "factory failed: " + prodRes.error(); return out; }
 
         Item product = prodRes.value();
         product.stackSize = rec->resultCount;
 
-        // ensure we have room for the product
+        // space check
         auto can = canAdd(product);
-        if (!can) return Result<void>::err("no space/weight for crafted item");
+        if (!can) { out.errorMsg = "no space/weight for crafted item"; return out; }
 
-        // consume ingredients
+        // consume ingredients (before success roll — like real crafting)
         for (auto& [ingId, qty] : rec->ingredients) {
             auto rem = removeItem(ingId, qty);
-            if (!rem) return Result<void>::err("failed to consume '" + ingId + "': " + rem.error());
+            if (!rem) { out.errorMsg = "failed to consume '" + ingId + "'"; return out; }
         }
 
-        // store product
-        auto addRes = addItem(product);
-        if (!addRes) return Result<void>::err("failed to store crafted item: " + addRes.error());
+        // success roll
+        float chance = mastery.successChance(*rec);
+        std::uniform_real_distribution<float> roll(0.0f, 1.0f);
+        if (roll(rng) > chance) {
+            Log::info("Craft failed for '" + resultId + "' (ingredients consumed)");
+            out.errorMsg = "crafting failed — materials were lost";
+            return out;
+        }
 
-        Log::info("Crafted '" + resultId + "' x" + std::to_string(product.stackSize));
-        return Result<void>::ok();
+        // quality roll
+        CraftQuality quality = mastery.rollQuality(*rec, rng);
+        out.quality = quality;
+
+        // apply quality multiplier to item stats
+        float mul = qualityMultiplier(quality);
+        if (mul > 1.0f) {
+            std::visit([mul](auto& data) {
+                using T = std::decay_t<decltype(data)>;
+                if constexpr (std::is_same_v<T, WeaponData>) {
+                    data.damage = static_cast<int>(data.damage * mul);
+                    if (data.maxDurability > 0)
+                        data.maxDurability = data.durability = static_cast<int>(data.maxDurability * mul);
+                } else if constexpr (std::is_same_v<T, ArmorData>) {
+                    data.defense = static_cast<int>(data.defense * mul);
+                    if (data.maxDurability > 0)
+                        data.maxDurability = data.durability = static_cast<int>(data.maxDurability * mul);
+                } else if constexpr (std::is_same_v<T, ConsumableData>) {
+                    data.healAmount = static_cast<int>(data.healAmount * mul);
+                }
+            }, product.data);
+        }
+
+        // masterwork items get a free enchantment
+        if (quality == CraftQuality::Masterwork &&
+            (product.type == ItemType::Weapon || product.type == ItemType::Armor)) {
+            static const std::array<Stat,4> stats{Stat::Attack,Stat::Defense,Stat::Health,Stat::Mana};
+            std::uniform_int_distribution<int> ds(0,3), dv(3,6);
+            Enchantment e;
+            e.stat  = stats[static_cast<std::size_t>(ds(rng))];
+            e.value = dv(rng);
+            e.name  = "of Mastery";
+            product.enchantments.push_back(e);
+        }
+
+        auto addRes = addItem(product);
+        if (!addRes) { out.errorMsg = "failed to store crafted item: " + addRes.error(); return out; }
+
+        out.success  = true;
+        out.leveledUp = mastery.awardXP(rec->category, 10);
+        Log::info("Crafted '" + resultId + "' [" + toString(quality) + "] x"
+                  + std::to_string(product.stackSize));
+        return out;
     }
 
     // -----------------------------------------------------------------
