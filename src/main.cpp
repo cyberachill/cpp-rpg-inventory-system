@@ -133,16 +133,10 @@ int main() {
                 break;
             }
             case 6: {   // ekipmanı çıkar
-                std::cout << "Enter slot name (Head, Chest, Legs, Weapon, Shield, Accessory): ";
+                std::cout << "Enter slot name (Head/Chest/Legs/Feet/Hands/Weapon/Shield/Ring1/Ring2/Accessory): ";
                 std::string slotStr;
                 std::getline(std::cin, slotStr);
-                EquipSlot slot = EquipSlot::None;
-                if (slotStr == "Head")       slot = EquipSlot::Head;
-                else if (slotStr == "Chest") slot = EquipSlot::Chest;
-                else if (slotStr == "Legs")  slot = EquipSlot::Legs;
-                else if (slotStr == "Weapon")slot = EquipSlot::Weapon;
-                else if (slotStr == "Shield")slot = EquipSlot::Shield;
-                else if (slotStr == "Accessory") slot = EquipSlot::Accessory;
+                EquipSlot slot = stringToEquipSlot(slotStr);
                 if (slot == EquipSlot::None) {
                     std::cout << "Invalid slot.\n";
                     break;

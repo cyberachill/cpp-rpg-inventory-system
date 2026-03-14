@@ -504,14 +504,7 @@ public:
         if (j.contains("equipment") && j["equipment"].is_object()) {
             const json& eq = j["equipment"];
             for (auto& [slotStr, slotVal] : eq.items()) {
-                EquipSlot slot = EquipSlot::None;
-                if (slotStr == "Head")           slot = EquipSlot::Head;
-                else if (slotStr == "Chest")     slot = EquipSlot::Chest;
-                else if (slotStr == "Legs")      slot = EquipSlot::Legs;
-                else if (slotStr == "Weapon")    slot = EquipSlot::Weapon;
-                else if (slotStr == "Shield")    slot = EquipSlot::Shield;
-                else if (slotStr == "Accessory") slot = EquipSlot::Accessory;
-
+                EquipSlot slot = stringToEquipSlot(slotStr);
                 if (slot == EquipSlot::None) continue;
 
                 if (!slotVal.is_null()) {
@@ -575,21 +568,31 @@ private:
     std::vector<Item> items_;
     std::unordered_map<EquipSlot, std::unique_ptr<Item>> equipped_;
 
-    static EquipSlot slotForItem(const Item& it) {
+    // Returns the preferred slot; for Ring1/Ring2 the caller may promote to Ring2.
+    EquipSlot slotForItem(const Item& it) const {
         if (it.type == ItemType::Weapon)      return EquipSlot::Weapon;
         if (it.type == ItemType::Armor) {
             const std::string& id = it.id;
             if (id.find("helmet") != std::string::npos ||
-                id.find("head")   != std::string::npos) return EquipSlot::Head;
+                id.find("head")   != std::string::npos)  return EquipSlot::Head;
             if (id.find("chest")  != std::string::npos ||
-                id.find("armor")  != std::string::npos) return EquipSlot::Chest;
-            if (id.find("leg")    != std::string::npos ||
-                id.find("boots")  != std::string::npos) return EquipSlot::Legs;
+                id.find("plate")  != std::string::npos)  return EquipSlot::Chest;
+            if (id.find("leg")    != std::string::npos)  return EquipSlot::Legs;
+            if (id.find("boots")  != std::string::npos ||
+                id.find("feet")   != std::string::npos)  return EquipSlot::Feet;
+            if (id.find("glove")  != std::string::npos ||
+                id.find("hands")  != std::string::npos ||
+                id.find("gauntlet") != std::string::npos) return EquipSlot::Hands;
             return EquipSlot::Chest;
         }
-        if (it.id.find("shield") != std::string::npos) return EquipSlot::Shield;
-        if (it.id.find("ring")   != std::string::npos ||
-            it.id.find("amulet") != std::string::npos) return EquipSlot::Accessory;
+        if (it.id.find("shield") != std::string::npos)  return EquipSlot::Shield;
+        if (it.id.find("ring")   != std::string::npos) {
+            // prefer Ring1; promote to Ring2 if Ring1 is occupied
+            auto r1 = equipped_.find(EquipSlot::Ring1);
+            if (r1 == equipped_.end() || !r1->second)   return EquipSlot::Ring1;
+            return EquipSlot::Ring2;
+        }
+        if (it.id.find("amulet") != std::string::npos)  return EquipSlot::Accessory;
         return EquipSlot::None;
     }
 };

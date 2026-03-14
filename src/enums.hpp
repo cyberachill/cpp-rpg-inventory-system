@@ -6,7 +6,7 @@
  *  2) Core enums & helpers
  *====================================================================*/
 enum class ItemType   { Weapon, Armor, Consumable, Material, Misc };
-enum class EquipSlot  { Head, Chest, Legs, Weapon, Shield, Accessory, None };
+enum class EquipSlot  { Head, Chest, Legs, Feet, Hands, Weapon, Shield, Ring1, Ring2, Accessory, None };
 enum class Rarity     { Common, Uncommon, Rare, Epic, Legendary };
 enum class Stat       { Attack, Defense, Health, Mana, MaxHP, Speed, CritChance };
 
@@ -49,11 +49,28 @@ inline std::string toString(EquipSlot s) {
         case EquipSlot::Head:       return "Head";
         case EquipSlot::Chest:      return "Chest";
         case EquipSlot::Legs:       return "Legs";
+        case EquipSlot::Feet:       return "Feet";
+        case EquipSlot::Hands:      return "Hands";
         case EquipSlot::Weapon:     return "Weapon";
         case EquipSlot::Shield:     return "Shield";
+        case EquipSlot::Ring1:      return "Ring1";
+        case EquipSlot::Ring2:      return "Ring2";
         case EquipSlot::Accessory:  return "Accessory";
         default:                    return "None";
     }
+}
+inline EquipSlot stringToEquipSlot(const std::string& s) {
+    if (s == "Head")      return EquipSlot::Head;
+    if (s == "Chest")     return EquipSlot::Chest;
+    if (s == "Legs")      return EquipSlot::Legs;
+    if (s == "Feet")      return EquipSlot::Feet;
+    if (s == "Hands")     return EquipSlot::Hands;
+    if (s == "Weapon")    return EquipSlot::Weapon;
+    if (s == "Shield")    return EquipSlot::Shield;
+    if (s == "Ring1")     return EquipSlot::Ring1;
+    if (s == "Ring2")     return EquipSlot::Ring2;
+    if (s == "Accessory") return EquipSlot::Accessory;
+    return EquipSlot::None;
 }
 inline std::string toString(Stat s) {
     switch (s) {
