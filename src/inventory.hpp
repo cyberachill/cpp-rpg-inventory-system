@@ -136,6 +136,31 @@ public:
         if (it->isBroken())
             return Result<void>::err("cannot equip a broken item — repair it first");
 
+        // Two-handed weapon: auto-unequip shield first; shield: block if two-hander in Weapon
+        if (it->type == ItemType::Weapon) {
+            if (const auto* wd = std::get_if<WeaponData>(&it->data)) {
+                if (wd->weaponType == WeaponType::TwoHanded) {
+                    auto shIt = equipped_.find(EquipSlot::Shield);
+                    if (shIt != equipped_.end() && shIt->second) {
+                        int shW = shIt->second->getWeight();
+                        totalWeight_ -= shW;
+                        auto back = addItem(*shIt->second);
+                        if (!back) { totalWeight_ += shW; return Result<void>::err("cannot unequip shield for two-hander: " + back.error()); }
+                        shIt->second.reset();
+                        Log::info("Auto-unequipped Shield for two-handed weapon.");
+                    }
+                } else if (wd->weaponType == WeaponType::Shield) {
+                    // Block equipping a shield if a two-handed weapon is in the weapon slot
+                    auto wpIt = equipped_.find(EquipSlot::Weapon);
+                    if (wpIt != equipped_.end() && wpIt->second) {
+                        if (const auto* wwd = std::get_if<WeaponData>(&wpIt->second->data))
+                            if (wwd->weaponType == WeaponType::TwoHanded)
+                                return Result<void>::err("cannot equip a shield while wielding a two-handed weapon");
+                    }
+                }
+            }
+        }
+
         EquipSlot slot = slotForItem(*it);
         if (slot == EquipSlot::None)
             return Result<void>::err("item not equipable");
@@ -888,7 +913,11 @@ private:
 
     // Returns the preferred slot; for Ring1/Ring2 the caller may promote to Ring2.
     EquipSlot slotForItem(const Item& it) const {
-        if (it.type == ItemType::Weapon)      return EquipSlot::Weapon;
+        if (it.type == ItemType::Weapon) {
+            if (const auto* wd = std::get_if<WeaponData>(&it.data))
+                if (wd->weaponType == WeaponType::Shield) return EquipSlot::Shield;
+            return EquipSlot::Weapon;
+        }
         if (it.type == ItemType::Armor) {
             const std::string& id = it.id;
             if (id.find("helmet") != std::string::npos ||
