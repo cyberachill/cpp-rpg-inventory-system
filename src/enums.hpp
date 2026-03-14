@@ -8,7 +8,7 @@
 enum class ItemType   { Weapon, Armor, Consumable, Material, Misc };
 enum class EquipSlot  { Head, Chest, Legs, Weapon, Shield, Accessory, None };
 enum class Rarity     { Common, Uncommon, Rare, Epic, Legendary };
-enum class Stat       { Attack, Defense, Health, Mana };
+enum class Stat       { Attack, Defense, Health, Mana, MaxHP, Speed, CritChance };
 
 inline std::string toString(ItemType t) {
     switch (t) {
@@ -57,18 +57,24 @@ inline std::string toString(EquipSlot s) {
 }
 inline std::string toString(Stat s) {
     switch (s) {
-        case Stat::Attack:  return "Attack";
-        case Stat::Defense: return "Defense";
-        case Stat::Health:  return "Health";
-        case Stat::Mana:    return "Mana";
-        default:            return "Unknown";
+        case Stat::Attack:     return "Attack";
+        case Stat::Defense:    return "Defense";
+        case Stat::Health:     return "Health";
+        case Stat::Mana:       return "Mana";
+        case Stat::MaxHP:      return "MaxHP";
+        case Stat::Speed:      return "Speed";
+        case Stat::CritChance: return "CritChance";
+        default:               return "Unknown";
     }
 }
 inline Stat stringToStat(const std::string& s) {
-    if (s == "Attack")  return Stat::Attack;
-    if (s == "Defense") return Stat::Defense;
-    if (s == "Health")  return Stat::Health;
-    if (s == "Mana")    return Stat::Mana;
+    if (s == "Attack")     return Stat::Attack;
+    if (s == "Defense")    return Stat::Defense;
+    if (s == "Health")     return Stat::Health;
+    if (s == "Mana")       return Stat::Mana;
+    if (s == "MaxHP")      return Stat::MaxHP;
+    if (s == "Speed")      return Stat::Speed;
+    if (s == "CritChance") return Stat::CritChance;
     return Stat::Attack;
 }
 inline std::string rarityColor(Rarity r) {

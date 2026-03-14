@@ -263,6 +263,29 @@ public:
     }
 
     // -----------------------------------------------------------------
+    //  Consumables
+    // -----------------------------------------------------------------
+    // Returns the healAmount of the consumable (caller applies it to Player).
+    // Consumes one unit from the stack.
+    Result<int> useConsumable(const std::string& id) {
+        auto it = std::find_if(items_.begin(), items_.end(),
+            [&](const Item& i){ return i.id == id; });
+        if (it == items_.end())
+            return Result<int>::err("item '" + id + "' not in inventory");
+        if (it->type != ItemType::Consumable)
+            return Result<int>::err("'" + id + "' is not a consumable");
+        const auto* cd = std::get_if<ConsumableData>(&it->data);
+        if (!cd) return Result<int>::err("internal error: bad consumable data");
+
+        int amount = cd->healAmount;
+        auto rem = removeItem(id, 1);
+        if (!rem) return Result<int>::err("failed to consume: " + rem.error());
+
+        Log::info("Used consumable '" + id + "' (heal " + std::to_string(amount) + ")");
+        return Result<int>::ok(amount);
+    }
+
+    // -----------------------------------------------------------------
     //  Durability management
     // -----------------------------------------------------------------
     Result<void> degradeEquipped(EquipSlot slot, int amount = 1) {
