@@ -164,24 +164,39 @@ int main() {
             }
             case 7: {   // kaydet
                 std::ofstream out("savegame.json");
-                if (!out) {
-                    std::cout << "Cannot open save file.\n";
-                    break;
-                }
-                out << inv.serialize();
+                if (!out) { std::cout << "Cannot open save file.\n"; break; }
+                // wrap inventory JSON inside a top-level game state object
+                json invJson = json_parse(inv.serialize());
+                json save;
+                save["version"] = 1;
+                save["gold"]    = playerGold;
+                save["level"]   = player.level();
+                save["inventory"] = invJson;
+                out << save.dump(4);
                 std::cout << "Game saved to savegame.json\n";
                 break;
             }
             case 8: {   // yükle
                 std::ifstream in("savegame.json");
-                if (!in) {
-                    std::cout << "Cannot open save file.\n";
-                    break;
-                }
+                if (!in) { std::cout << "Cannot open save file.\n"; break; }
                 std::string content((std::istreambuf_iterator<char>(in)), {});
-                auto loadRes = inv.deserialize(content);
-                if (!loadRes) std::cout << "Load failed: " << loadRes.error() << "\n";
-                else          std::cout << "Game loaded.\n";
+                try {
+                    json save = json_parse(content);
+                    // legacy format: top-level has "items" directly
+                    bool legacy = save.contains("items");
+                    const json& invJson = legacy ? save : save.at("inventory");
+                    auto loadRes = inv.deserialize(invJson.dump());
+                    if (!loadRes) { std::cout << "Load failed: " << loadRes.error() << "\n"; break; }
+                    if (!legacy) {
+                        playerGold = save.value("gold",  playerGold);
+                        int lvl    = save.value("level", player.level());
+                        player.setLevel(lvl);
+                    }
+                    std::cout << "Game loaded. [Gold: " << playerGold
+                              << "g | Level: " << player.level() << "]\n";
+                } catch (const std::exception& e) {
+                    std::cout << "Load failed: " << e.what() << "\n";
+                }
                 break;
             }
             case 9: {   // darbe vur – silah yıpransın
