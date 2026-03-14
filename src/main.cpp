@@ -73,6 +73,8 @@ int main() {
         std::cout << "23) Filter inventory\n";
         std::cout << "24) Split stack\n";
         std::cout << "25) Compare item to equipped\n";
+        std::cout << "26) Disenchant item\n";
+        std::cout << "27) Upgrade item (costs 3x upgrade_stone)\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -334,6 +336,25 @@ int main() {
                 auto res = inv.splitStack(static_cast<std::size_t>(slotNum - 1), splitAmt);
                 if (!res) std::cout << "Split failed: " << res.error() << "\n";
                 else      std::cout << "Stack split successfully.\n";
+                break;
+            }
+            case 26: {  // disenchant
+                std::cout << "Enter item id to disenchant: ";
+                std::string deid;
+                std::getline(std::cin, deid);
+                auto res = inv.disenchantItem(deid, factory, rng);
+                if (!res) std::cout << "Disenchant failed: " << res.error() << "\n";
+                else      std::cout << "Removed enchantment '" << res.value()
+                                    << "'. Recovery stone added to inventory.\n";
+                break;
+            }
+            case 27: {  // upgrade item
+                std::cout << "Enter item id to upgrade: ";
+                std::string upid;
+                std::getline(std::cin, upid);
+                auto res = inv.upgradeItem(upid, "upgrade_stone", 3);
+                if (!res) std::cout << "Upgrade failed: " << res.error() << "\n";
+                else      std::cout << "Item upgraded! (consumed 3x upgrade_stone)\n";
                 break;
             }
             case 25: {  // compare item to equipped

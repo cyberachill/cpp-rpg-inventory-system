@@ -263,6 +263,117 @@ public:
     }
 
     // -----------------------------------------------------------------
+    //  Disenchant + Item Upgrade
+    // -----------------------------------------------------------------
+
+    // Remove one random enchantment from the item and return a recovery material.
+    // Gives back 1x enchanting_stone (basic) or enchanting_crystal (if rare+ enchant).
+    // Returns the name of the enchantment removed, or an error string.
+    Result<std::string> disenchantItem(const std::string& id,
+                                       ItemFactory& factory,
+                                       std::mt19937& rng) {
+        // find in bag or equipped
+        Item* target = nullptr;
+        for (auto& item : items_)
+            if (item.id == id) { target = &item; break; }
+        if (!target) {
+            for (auto& [slot, ptr] : equipped_)
+                if (ptr && ptr->id == id) { target = ptr.get(); break; }
+        }
+        if (!target)
+            return Result<std::string>::err("item '" + id + "' not found");
+        if (target->enchantments.empty())
+            return Result<std::string>::err("'" + target->name + "' has no enchantments");
+
+        // pick a random enchantment
+        std::uniform_int_distribution<std::size_t> di(
+            0, target->enchantments.size() - 1);
+        std::size_t idx = di(rng);
+        Enchantment removed = target->enchantments[idx];
+        target->enchantments.erase(target->enchantments.begin() +
+                                   static_cast<std::ptrdiff_t>(idx));
+
+        // determine recovery material
+        bool advanced = (removed.value >= 5);
+        std::string recovId = advanced ? "enchanting_crystal" : "enchanting_stone";
+        auto recov = factory.create(recovId, 1);
+        if (recov) {
+            auto addRes = addItem(recov.value());
+            if (!addRes)
+                Log::warn("Disenchant recovery item dropped (no space): " + addRes.error());
+        }
+
+        std::string enchName = removed.name.empty()
+                                ? toString(removed.stat)
+                                : removed.name;
+        Log::info("Disenchanted '" + id + "': removed '" + enchName +
+                  "', returned " + recovId);
+        return Result<std::string>::ok(enchName);
+    }
+
+    // Upgrade an item's primary combat stat by a fixed amount,
+    // consuming `costQty` units of `costId` from inventory.
+    // Weapon: +2 damage; Armor: +1 defense; per upgrade (up to 5 upgrades).
+    Result<void> upgradeItem(const std::string& id,
+                             const std::string& costId,
+                             int costQty,
+                             int maxUpgrades = 5) {
+        Item* target = nullptr;
+        for (auto& item : items_)
+            if (item.id == id) { target = &item; break; }
+        if (!target) {
+            for (auto& [slot, ptr] : equipped_)
+                if (ptr && ptr->id == id) { target = ptr.get(); break; }
+        }
+        if (!target)
+            return Result<void>::err("item '" + id + "' not found");
+        if (target->type != ItemType::Weapon && target->type != ItemType::Armor)
+            return Result<void>::err("only weapons and armor can be upgraded");
+
+        // track upgrades via a special enchantment named "Upgrade"
+        int upgrades = 0;
+        for (const auto& e : target->enchantments)
+            if (e.name == "Upgrade") upgrades += e.value;
+        if (upgrades >= maxUpgrades)
+            return Result<void>::err("'" + target->name + "' is already at max upgrade tier ("
+                                     + std::to_string(maxUpgrades) + ")");
+
+        // material check
+        if (count(costId) < costQty)
+            return Result<void>::err("need " + std::to_string(costQty) + "x " + costId);
+
+        // apply upgrade
+        bool applied = std::visit([](auto& data) -> bool {
+            using T = std::decay_t<decltype(data)>;
+            if constexpr (std::is_same_v<T, WeaponData>) { data.damage  += 2; return true; }
+            if constexpr (std::is_same_v<T, ArmorData>)  { data.defense += 1; return true; }
+            return false;
+        }, target->data);
+        if (!applied)
+            return Result<void>::err("item type not upgradeable");
+
+        // record upgrade counter as hidden enchantment
+        bool found = false;
+        for (auto& e : target->enchantments) {
+            if (e.name == "Upgrade") { e.value++; found = true; break; }
+        }
+        if (!found) {
+            Enchantment e;
+            e.stat  = Stat::Attack;
+            e.value = 1;
+            e.name  = "Upgrade";
+            target->enchantments.push_back(e);
+        }
+
+        // consume materials
+        auto rem = removeItem(costId, costQty);
+        if (!rem) return Result<void>::err("failed to consume materials: " + rem.error());
+
+        Log::info("Upgraded '" + id + "' (tier " + std::to_string(upgrades + 1) + ")");
+        return Result<void>::ok();
+    }
+
+    // -----------------------------------------------------------------
     //  Item comparison
     // -----------------------------------------------------------------
     // Prints a side-by-side stat delta between the bag item `id` and
