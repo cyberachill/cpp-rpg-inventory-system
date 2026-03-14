@@ -204,9 +204,27 @@ int main() {
                 if (!res) {
                     std::cout << "Strike failed: " << res.error() << "\n";
                 } else {
-                    std::cout << "You swing your weapon!\n";
                     const Item* w = inv.getEquipped(EquipSlot::Weapon);
-                    if (w) std::cout << "  " << w->getDescription() << "\n";
+                    // compute actual damage: weapon base + enchantment bonuses + set bonuses
+                    auto stats = player.computeStats(inv, setMgr);
+                    // base roll: ±20% variance around total attack
+                    std::uniform_int_distribution<int> dmgRoll(
+                        static_cast<int>(stats.attack * 0.8f),
+                        static_cast<int>(stats.attack * 1.2f));
+                    int dmg = std::max(1, dmgRoll(rng));
+                    // critical hit?
+                    std::uniform_int_distribution<int> critRoll(1, 100);
+                    bool crit = critRoll(rng) <= stats.critChance;
+                    if (crit) dmg = static_cast<int>(dmg * 1.5f);
+
+                    std::cout << "You swing your weapon";
+                    if (crit) std::cout << " \x1B[33m[CRITICAL HIT!]\x1B[0m";
+                    std::cout << " — dealing \x1B[31m" << dmg << " damage\x1B[0m!\n";
+                    if (w) {
+                        std::cout << "  " << w->getDescription() << "\n";
+                        if (w->isBroken())
+                            std::cout << "  \x1B[31mYour weapon has broken!\x1B[0m\n";
+                    }
                 }
                 break;
             }
