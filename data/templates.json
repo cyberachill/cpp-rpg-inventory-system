@@ -249,6 +249,41 @@
     "data": { "repairAmount": 0, "weight": 1 }
   },
 
+  /* ---------- SHADOW ROGUE SET ---------- */
+  {
+    "id": "shadow_hood",
+    "name": "Shadow Hood",
+    "type": "Armor",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 1,
+    "setId": "shadow_set",
+    "data": { "defense": 2, "durability": 50, "maxDurability": 50, "weight": 2 }
+  },
+  {
+    "id": "shadow_chestguard",
+    "name": "Shadow Chestguard",
+    "type": "Armor",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 1,
+    "setId": "shadow_set",
+    "data": { "defense": 3, "durability": 70, "maxDurability": 70, "weight": 4 }
+  },
+  {
+    "id": "shadow_leggings",
+    "name": "Shadow Leggings",
+    "type": "Armor",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 1,
+    "setId": "shadow_set",
+    "data": { "defense": 2, "durability": 60, "maxDurability": 60, "weight": 3 }
+  },
+
   /* ---------- CONSUMABLES ---------- */
   {
     "id": "health_potion",
