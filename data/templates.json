@@ -187,6 +187,68 @@
     "data": { "defense": 4, "durability": 80, "maxDurability": 80, "weight": 6 }
   },
 
+  {
+    "id": "iron_boots",
+    "name": "Iron Boots",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "setId": "iron_set",
+    "data": { "defense": 2, "durability": 50, "maxDurability": 50, "weight": 5 }
+  },
+  {
+    "id": "iron_gauntlets",
+    "name": "Iron Gauntlets",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "defense": 2, "durability": 50, "maxDurability": 50, "weight": 4 }
+  },
+  {
+    "id": "leather_boots",
+    "name": "Leather Boots",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "defense": 1, "durability": 60, "maxDurability": 60, "weight": 2 }
+  },
+  {
+    "id": "leather_gloves",
+    "name": "Leather Gloves",
+    "type": "Armor",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "defense": 1, "durability": 60, "maxDurability": 60, "weight": 1 }
+  },
+  {
+    "id": "ring_of_power",
+    "name": "Ring of Power",
+    "type": "Misc",
+    "rarity": "Uncommon",
+    "levelReq": 3,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+  {
+    "id": "ring_of_swiftness",
+    "name": "Ring of Swiftness",
+    "type": "Misc",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+
   /* ---------- CONSUMABLES ---------- */
   {
     "id": "health_potion",
