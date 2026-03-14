@@ -263,6 +263,69 @@ public:
     }
 
     // -----------------------------------------------------------------
+    //  Inventory UX — sort, filter, stack split
+    // -----------------------------------------------------------------
+    enum class SortKey { Name, Type, Rarity, Weight };
+
+    void sort(SortKey key = SortKey::Type) {
+        std::sort(items_.begin(), items_.end(), [key](const Item& a, const Item& b) {
+            switch (key) {
+                case SortKey::Name:
+                    return a.name < b.name;
+                case SortKey::Rarity:
+                    // rarer first
+                    return static_cast<int>(a.rarity) > static_cast<int>(b.rarity);
+                case SortKey::Weight:
+                    return a.getWeight() > b.getWeight();
+                default: // Type
+                    if (a.type != b.type)
+                        return static_cast<int>(a.type) < static_cast<int>(b.type);
+                    return static_cast<int>(a.rarity) > static_cast<int>(b.rarity);
+            }
+        });
+    }
+
+    // Returns pointers to items whose name or id contains the query (case-insensitive)
+    std::vector<const Item*> filter(const std::string& query) const {
+        std::string lq = query;
+        std::transform(lq.begin(), lq.end(), lq.begin(), ::tolower);
+        std::vector<const Item*> result;
+        for (const auto& item : items_) {
+            std::string ln = item.name;
+            std::transform(ln.begin(), ln.end(), ln.begin(), ::tolower);
+            if (ln.find(lq) != std::string::npos ||
+                item.id.find(lq) != std::string::npos)
+                result.push_back(&item);
+        }
+        return result;
+    }
+
+    // Split `amount` units from the stack at index `slotIdx` into a new slot
+    Result<void> splitStack(std::size_t slotIdx, int amount) {
+        if (slotIdx >= items_.size())
+            return Result<void>::err("invalid slot index");
+        Item& src = items_[slotIdx];
+        if (src.maxStack <= 1)
+            return Result<void>::err("'" + src.name + "' is not stackable");
+        if (amount <= 0 || amount >= src.stackSize)
+            return Result<void>::err("amount must be 1.." + std::to_string(src.stackSize - 1));
+        if (items_.size() >= slotLimit_)
+            return Result<void>::err("no free slot for split stack");
+
+        int unitWeight = src.weightPerUnit();
+        src.stackSize -= amount;
+        totalWeight_  -= unitWeight * amount;
+
+        Item split  = src;
+        split.stackSize = amount;
+        items_.push_back(split);
+        totalWeight_ += unitWeight * amount;
+
+        Log::info("Split " + std::to_string(amount) + "x '" + src.id + "'");
+        return Result<void>::ok();
+    }
+
+    // -----------------------------------------------------------------
     //  Consumables
     // -----------------------------------------------------------------
     // Returns the healAmount of the consumable (caller applies it to Player).

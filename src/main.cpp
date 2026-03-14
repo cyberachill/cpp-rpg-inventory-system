@@ -69,6 +69,9 @@ int main() {
         std::cout << "19) List all armor sets\n";
         std::cout << "20) Character sheet\n";
         std::cout << "21) Use consumable\n";
+        std::cout << "22) Sort inventory (name/type/rarity/weight)\n";
+        std::cout << "23) Filter inventory\n";
+        std::cout << "24) Split stack\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -289,6 +292,47 @@ int main() {
             }
             case 20: {  // character sheet
                 player.printSheet(inv, setMgr);
+                break;
+            }
+            case 22: {  // sort inventory
+                std::cout << "Sort by (name/type/rarity/weight): ";
+                std::string sk;
+                std::getline(std::cin, sk);
+                Inventory::SortKey key = Inventory::SortKey::Type;
+                if (sk == "name")   key = Inventory::SortKey::Name;
+                else if (sk == "rarity") key = Inventory::SortKey::Rarity;
+                else if (sk == "weight") key = Inventory::SortKey::Weight;
+                inv.sort(key);
+                std::cout << "Inventory sorted by " << sk << ".\n";
+                break;
+            }
+            case 23: {  // filter inventory
+                std::cout << "Search query: ";
+                std::string query;
+                std::getline(std::cin, query);
+                auto results = inv.filter(query);
+                if (results.empty()) {
+                    std::cout << "No items match '" << query << "'.\n";
+                } else {
+                    std::cout << "  Found " << results.size() << " item(s):\n";
+                    for (const auto* it : results)
+                        std::cout << "  " << it->getDescription() << "\n";
+                }
+                break;
+            }
+            case 24: {  // split stack
+                std::cout << "Enter slot number to split (1-based): ";
+                int slotNum;
+                std::cin >> slotNum;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                std::cout << "Enter amount to split off: ";
+                int splitAmt;
+                std::cin >> splitAmt;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                if (slotNum < 1) { std::cout << "Invalid slot.\n"; break; }
+                auto res = inv.splitStack(static_cast<std::size_t>(slotNum - 1), splitAmt);
+                if (!res) std::cout << "Split failed: " << res.error() << "\n";
+                else      std::cout << "Stack split successfully.\n";
                 break;
             }
             case 21: {  // use consumable
