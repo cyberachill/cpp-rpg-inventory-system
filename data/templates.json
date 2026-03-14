@@ -119,7 +119,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "damage": 8, "durability": 100, "weight": 5 }
+    "data": { "damage": 8, "durability": 100, "maxDurability": 100, "weight": 5 }
   },
   {
     "id": "steel_sword",
@@ -129,7 +129,7 @@
     "levelReq": 2,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "damage": 12, "durability": 120, "weight": 6 }
+    "data": { "damage": 12, "durability": 120, "maxDurability": 120, "weight": 6 }
   },
   {
     "id": "bow",
@@ -139,7 +139,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "damage": 7, "durability": 80, "weight": 4 }
+    "data": { "damage": 7, "durability": 80, "maxDurability": 80, "weight": 4 }
   },
   {
     "id": "shield_wooden",
@@ -149,7 +149,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "damage": 2, "durability": 150, "weight": 7 }
+    "data": { "damage": 2, "durability": 150, "maxDurability": 150, "weight": 7 }
   },
 
   /* ---------- ARMOR ---------- */
@@ -161,7 +161,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "defense": 3, "weight": 4 }
+    "data": { "defense": 3, "durability": 60, "maxDurability": 60, "weight": 4 }
   },
   {
     "id": "iron_chestplate",
@@ -171,7 +171,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "defense": 5, "weight": 8 }
+    "data": { "defense": 5, "durability": 100, "maxDurability": 100, "weight": 8 }
   },
   {
     "id": "iron_leggings",
@@ -181,7 +181,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "defense": 4, "weight": 6 }
+    "data": { "defense": 4, "durability": 80, "maxDurability": 80, "weight": 6 }
   },
 
   /* ---------- CONSUMABLES ---------- */
@@ -225,6 +225,28 @@
     "levelReq": 7,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "weight": 1 }
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+
+  /* ---------- REPAIR KITS ---------- */
+  {
+    "id": "repair_kit_basic",
+    "name": "Basic Repair Kit",
+    "type": "Misc",
+    "rarity": "Common",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 10,
+    "data": { "repairAmount": 30, "weight": 1 }
+  },
+  {
+    "id": "repair_kit_advanced",
+    "name": "Advanced Repair Kit",
+    "type": "Misc",
+    "rarity": "Uncommon",
+    "levelReq": 3,
+    "stackSize": 1,
+    "maxStack": 5,
+    "data": { "repairAmount": 80, "weight": 1 }
   }
 ]

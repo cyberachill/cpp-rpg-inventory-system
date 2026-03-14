@@ -57,6 +57,16 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # ------------------------------------------------------------
+# nlohmann/json (installed system‑wide via nlohmann-json3-dev)
+# ------------------------------------------------------------
+find_package(nlohmann_json QUIET)
+if(nlohmann_json_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
+else()
+    target_include_directories(${PROJECT_NAME} PRIVATE /usr/include)
+endif()
+
+# ------------------------------------------------------------
 # Build type default (Debug) – IDE'lerde kolaylık sağlar
 # ------------------------------------------------------------
 if(NOT CMAKE_BUILD_TYPE)

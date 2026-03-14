@@ -35,6 +35,8 @@ int main() {
         std::cout << "6) Unequip slot\n";
         std::cout << "7) Save game\n";
         std::cout << "8) Load game\n";
+        std::cout << "9) Strike with weapon (degrades it)\n";
+        std::cout << "10) Use repair kit\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -133,6 +135,29 @@ int main() {
                 auto loadRes = inv.deserialize(content);
                 if (!loadRes) std::cout << "Load failed: " << loadRes.error() << "\n";
                 else          std::cout << "Game loaded.\n";
+                break;
+            }
+            case 9: {   // darbe vur – silah yıpransın
+                auto res = inv.degradeEquipped(EquipSlot::Weapon, 5);
+                if (!res) {
+                    std::cout << "Strike failed: " << res.error() << "\n";
+                } else {
+                    std::cout << "You swing your weapon!\n";
+                    const Item* w = inv.getEquipped(EquipSlot::Weapon);
+                    if (w) std::cout << "  " << w->getDescription() << "\n";
+                }
+                break;
+            }
+            case 10: {  // tamir kiti kullan
+                std::cout << "Enter repair kit id (e.g. repair_kit_basic): ";
+                std::string kitId;
+                std::getline(std::cin, kitId);
+                std::cout << "Enter item id to repair: ";
+                std::string targetId;
+                std::getline(std::cin, targetId);
+                auto res = inv.useRepairKit(kitId, targetId);
+                if (!res) std::cout << "Repair failed: " << res.error() << "\n";
+                else      std::cout << "Item repaired successfully.\n";
                 break;
             }
             default:

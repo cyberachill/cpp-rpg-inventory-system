@@ -132,6 +132,9 @@ public:
         if (it->levelReq > playerLevel)
             return Result<void>::err("your level is too low to equip this item");
 
+        if (it->isBroken())
+            return Result<void>::err("cannot equip a broken item — repair it first");
+
         EquipSlot slot = slotForItem(*it);
         if (slot == EquipSlot::None)
             return Result<void>::err("item not equipable");
@@ -194,6 +197,61 @@ public:
     }
 
     // -----------------------------------------------------------------
+    //  Durability management
+    // -----------------------------------------------------------------
+    Result<void> degradeEquipped(EquipSlot slot, int amount = 1) {
+        auto it = equipped_.find(slot);
+        if (it == equipped_.end() || !it->second)
+            return Result<void>::err("no item equipped in that slot");
+        it->second->degrade(amount);
+        if (it->second->isBroken())
+            Log::warn("'" + it->second->name + "' has broken!");
+        return Result<void>::ok();
+    }
+
+    // Direct repair by amount (e.g. paid smithy). Works on bag and equipped slots.
+    Result<void> repairItem(const std::string& id, int amount) {
+        for (auto& item : items_) {
+            if (item.id == id) {
+                if (!item.repair(amount))
+                    return Result<void>::err("item has no durability to restore");
+                Log::info("Repaired '" + id + "' by " + std::to_string(amount));
+                return Result<void>::ok();
+            }
+        }
+        for (auto& [slot, ptr] : equipped_) {
+            if (ptr && ptr->id == id) {
+                if (!ptr->repair(amount))
+                    return Result<void>::err("item has no durability to restore");
+                Log::info("Repaired equipped '" + id + "' by " + std::to_string(amount));
+                return Result<void>::ok();
+            }
+        }
+        return Result<void>::err("item '" + id + "' not found");
+    }
+
+    // Consume one repair kit from bag and apply its repairAmount to the target item
+    Result<void> useRepairKit(const std::string& kitId, const std::string& targetId) {
+        auto kitIt = std::find_if(items_.begin(), items_.end(),
+            [&](const Item& i){ return i.id == kitId; });
+        if (kitIt == items_.end())
+            return Result<void>::err("repair kit '" + kitId + "' not in inventory");
+        const auto* misc = std::get_if<MiscData>(&kitIt->data);
+        if (!misc || misc->repairAmount <= 0)
+            return Result<void>::err("'" + kitId + "' is not a repair kit");
+
+        int amount = misc->repairAmount;
+        auto res = repairItem(targetId, amount);
+        if (!res) return res;
+
+        auto rem = removeItem(kitId, 1);
+        if (!rem) return Result<void>::err("failed to consume kit: " + rem.error());
+
+        Log::info("Used '" + kitId + "' to repair '" + targetId + "'");
+        return Result<void>::ok();
+    }
+
+    // -----------------------------------------------------------------
     //  Crafting – uses ItemFactory + CraftingSystem
     // -----------------------------------------------------------------
     Result<void> craft(const std::string& resultId,
@@ -239,11 +297,22 @@ public:
     // -----------------------------------------------------------------
     std::string serialize() const {
         json j;
-        j["items"] = items_;
+        json itemArr = json::array();
+        for (const auto& item : items_) {
+            json jItem;
+            to_json(jItem, item);
+            itemArr.push_back(std::move(jItem));
+        }
+        j["items"] = itemArr;
         json eq;
         for (const auto& [slot, ptr] : equipped_) {
-            if (ptr) eq[toString(slot)] = *ptr;
-            else    eq[toString(slot)] = nullptr;
+            if (ptr) {
+                json jEq;
+                to_json(jEq, *ptr);
+                eq[toString(slot)] = std::move(jEq);
+            } else {
+                eq[toString(slot)] = nullptr;
+            }
         }
         j["equipment"] = eq;
         return j.dump(4);
@@ -251,7 +320,7 @@ public:
 
     Result<void> deserialize(const std::string& data) {
         json j;
-        try { j = json::parse(data); }
+        try { j = json_parse(data); }
         catch (const std::exception& e) { return Result<void>::err("JSON parse error: " + std::string(e.what())); }
 
         items_.clear();
@@ -263,7 +332,8 @@ public:
 
         for (const auto& elem : j["items"]) {
             try {
-                Item it = elem.get<Item>();
+                Item it{};
+                from_json(elem, it);
                 items_.push_back(it);
                 totalWeight_ += it.getWeight();
             } catch (const std::exception& e) {
@@ -273,21 +343,21 @@ public:
 
         if (j.contains("equipment") && j["equipment"].is_object()) {
             const json& eq = j["equipment"];
-            for (auto it = eq.object_begin(); it != eq.object_end(); ++it) {
-                const std::string& slotStr = it.key();
+            for (auto& [slotStr, slotVal] : eq.items()) {
                 EquipSlot slot = EquipSlot::None;
-                if (slotStr == "Head")       slot = EquipSlot::Head;
-                else if (slotStr == "Chest") slot = EquipSlot::Chest;
-                else if (slotStr == "Legs")  slot = EquipSlot::Legs;
-                else if (slotStr == "Weapon")slot = EquipSlot::Weapon;
-                else if (slotStr == "Shield")slot = EquipSlot::Shield;
+                if (slotStr == "Head")           slot = EquipSlot::Head;
+                else if (slotStr == "Chest")     slot = EquipSlot::Chest;
+                else if (slotStr == "Legs")      slot = EquipSlot::Legs;
+                else if (slotStr == "Weapon")    slot = EquipSlot::Weapon;
+                else if (slotStr == "Shield")    slot = EquipSlot::Shield;
                 else if (slotStr == "Accessory") slot = EquipSlot::Accessory;
 
                 if (slot == EquipSlot::None) continue;
 
-                if (!it.value().is_null()) {
+                if (!slotVal.is_null()) {
                     try {
-                        Item eqItem = it.value().get<Item>();
+                        Item eqItem{};
+                        from_json(slotVal, eqItem);
                         equipped_[slot] = std::make_unique<Item>(eqItem);
                         totalWeight_ += eqItem.getWeight();
                     } catch (const std::exception& e) {

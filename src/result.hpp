@@ -7,7 +7,7 @@
 #include <type_traits>
 
 /*======================================================================
- *  0) Simple Result type (value / error handling)
+ *  0) Simple Result type (value / error handling)
  *====================================================================*/
 template <typename T>
 class Result {
@@ -25,13 +25,10 @@ public:
     // factory helpers
     template <typename U = T>
     static Result ok(U&& v) { return Result(std::forward<U>(v)); }
-
     static Result err(const std::string& e) { return Result(e); }
 
-    // conversion to bool – true = ok, false = error
+    // conversion to bool – true = ok, false = error
     explicit operator bool() const noexcept { return value_.has_value(); }
-    bool ok()   const noexcept { return static_cast<bool>(*this); }
-    bool error()const noexcept { return !value_; }
 
     // accessors
     const T& value() const {
@@ -54,12 +51,9 @@ class Result<void> {
 public:
     Result(bool ok = true, const std::string& err = "") : ok_(ok), error_(err) {}
 
-    static Result ok()   { return Result(true, ""); }
+    static Result ok()  { return Result(true,  ""); }
     static Result err(const std::string& e) { return Result(false, e); }
 
     explicit operator bool() const noexcept { return ok_; }
-    bool ok()   const noexcept { return ok_; }
-    bool error()const noexcept { return !ok_; }
-
     const std::string& error() const noexcept { return error_; }
 };

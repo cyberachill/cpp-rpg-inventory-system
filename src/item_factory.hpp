@@ -3,6 +3,7 @@
 #include "item.hpp"
 #include "result.hpp"
 #include "enums.hpp"
+#include "logger.hpp"
 
 #include <unordered_map>
 #include <random>
@@ -71,7 +72,7 @@ public:
         if (!in) return Result<void>::err("Cannot open templates file '" + path + "'");
         std::string content((std::istreambuf_iterator<char>(in)), {});
         json j;
-        try { j = json::parse(content); }
+        try { j = json_parse(content); }
         catch (const std::exception& e) { return Result<void>::err("JSON parse error: " + std::string(e.what())); }
 
         if (!j.is_array())
@@ -79,7 +80,8 @@ public:
 
         for (const auto& elem : j) {
             try {
-                Item tmpl = elem.get<Item>();
+                Item tmpl{};
+                from_json(elem, tmpl);
                 templates_[tmpl.id] = tmpl;
             } catch (const std::exception& e) {
                 Log::warn("Failed to parse template: " + std::string(e.what()));
