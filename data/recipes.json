@@ -145,5 +145,17 @@
       "gem": 3,
       "gold_ingot": 2
     }
+  },
+  {
+    "resultId": "upgrade_stone",
+    "resultCount": 2,
+    "ingredients": {
+      "iron_ingot": 2,
+      "coal": 1
+    },
+    "category": "blacksmithing",
+    "levelReq": 2,
+    "masteryReq": 0,
+    "baseSuccessChance": 1.0
   }
 ]

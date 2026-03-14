@@ -335,5 +335,17 @@
     "stackSize": 1,
     "maxStack": 5,
     "data": { "repairAmount": 0, "weight": 1 }
+  },
+
+  /* ---------- UPGRADE STONES ---------- */
+  {
+    "id": "upgrade_stone",
+    "name": "Upgrade Stone",
+    "type": "Misc",
+    "rarity": "Uncommon",
+    "levelReq": 2,
+    "stackSize": 1,
+    "maxStack": 20,
+    "data": { "repairAmount": 0, "weight": 1 }
   }
 ]
