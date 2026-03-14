@@ -41,6 +41,14 @@ int main() {
 
     Inventory inv(30, 300);                  // 30 slot, 300 ağırlık limiti
     Player    player(5);                     // level 5
+
+    // Pre-seed basic recipes every crafter knows from the start
+    for (const std::string& r : {
+        "iron_ingot", "steel_ingot", "gold_ingot",
+        "health_potion", "repair_kit_basic",
+        "enchanting_stone", "iron_sword"
+    }) inv.learnRecipeById(r);
+
     shop.stockFromFactory(factory, player.level());
 
     while (true) {
@@ -75,6 +83,8 @@ int main() {
         std::cout << "25) Compare item to equipped\n";
         std::cout << "26) Disenchant item\n";
         std::cout << "27) Upgrade item (costs 3x upgrade_stone)\n";
+        std::cout << "28) Use recipe scroll\n";
+        std::cout << "29) Show known recipes\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -336,6 +346,20 @@ int main() {
                 auto res = inv.splitStack(static_cast<std::size_t>(slotNum - 1), splitAmt);
                 if (!res) std::cout << "Split failed: " << res.error() << "\n";
                 else      std::cout << "Stack split successfully.\n";
+                break;
+            }
+            case 28: {  // use recipe scroll
+                std::cout << "Enter scroll id (e.g. recipe_scroll_steel_sword): ";
+                std::string scrollId;
+                std::getline(std::cin, scrollId);
+                auto res = inv.learnFromScroll(scrollId);
+                if (!res) std::cout << "Learn failed: " << res.error() << "\n";
+                else      std::cout << "Learned recipe: " << res.value() << "!\n";
+                break;
+            }
+            case 29: {  // known recipes
+                std::cout << "\n--- Known Recipes ---\n";
+                inv.printKnownRecipes(crafting);
                 break;
             }
             case 26: {  // disenchant

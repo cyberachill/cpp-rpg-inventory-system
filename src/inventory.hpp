@@ -13,6 +13,7 @@
 #include <string>
 #include <cstddef>
 #include <utility>
+#include <unordered_set>
 
 /*======================================================================
  *  6) Inventory – stacking, weight/slot limits, equip slots, persistence
@@ -260,6 +261,62 @@ public:
         Log::info("Enchanted '" + targetId + "' with +" + std::to_string(e.value)
                   + " " + toString(e.stat));
         return Result<void>::ok();
+    }
+
+    // -----------------------------------------------------------------
+    //  Recipe Discovery
+    // -----------------------------------------------------------------
+
+    // Pre-seed known recipes (called at game start for basic items)
+    void learnRecipeById(const std::string& recipeId) {
+        knownRecipes_.insert(recipeId);
+    }
+
+    // Consume a recipe scroll from inventory; returns the recipe id unlocked.
+    // Scroll naming convention: "recipe_scroll_<resultId>"
+    Result<std::string> learnFromScroll(const std::string& scrollId) {
+        auto it = std::find_if(items_.begin(), items_.end(),
+            [&](const Item& i){ return i.id == scrollId; });
+        if (it == items_.end())
+            return Result<std::string>::err("scroll '" + scrollId + "' not in inventory");
+        if (it->type != ItemType::Misc)
+            return Result<std::string>::err("'" + scrollId + "' is not a recipe scroll");
+
+        // extract recipe id from scroll id: "recipe_scroll_X" → "X"
+        const std::string prefix = "recipe_scroll_";
+        if (scrollId.substr(0, prefix.size()) != prefix)
+            return Result<std::string>::err("'" + scrollId + "' is not a recipe scroll");
+        std::string recipeId = scrollId.substr(prefix.size());
+
+        if (knownRecipes_.count(recipeId))
+            return Result<std::string>::err("recipe '" + recipeId + "' already known");
+
+        knownRecipes_.insert(recipeId);
+        auto rem = removeItem(scrollId, 1);
+        if (!rem) return Result<std::string>::err("failed to consume scroll: " + rem.error());
+
+        Log::info("Learned recipe: " + recipeId);
+        return Result<std::string>::ok(recipeId);
+    }
+
+    bool knowsRecipe(const std::string& id) const {
+        // empty knownRecipes = discovery disabled (backwards-compat)
+        return knownRecipes_.empty() || knownRecipes_.count(id) > 0;
+    }
+
+    void printKnownRecipes(const CraftingSystem& crafting) const {
+        if (knownRecipes_.empty()) {
+            std::cout << "  (All recipes available — no scroll system active)\n";
+            return;
+        }
+        std::cout << "  Known recipes:\n";
+        for (const auto& rid : knownRecipes_) {
+            const Recipe* r = crafting.get(rid);
+            if (r)
+                std::cout << "    " << rid << " [" << r->category << "]\n";
+            else
+                std::cout << "    " << rid << " (recipe data missing)\n";
+        }
     }
 
     // -----------------------------------------------------------------
@@ -604,6 +661,12 @@ public:
         const Recipe* rec = crafting.get(resultId);
         if (!rec) { out.errorMsg = "no recipe for '" + resultId + "'"; return out; }
 
+        // discovery check
+        if (!knowsRecipe(resultId)) {
+            out.errorMsg = "recipe '" + resultId + "' not yet discovered — find a scroll!";
+            return out;
+        }
+
         // level check
         if (playerLevel < rec->levelReq) {
             out.errorMsg = "requires player level " + std::to_string(rec->levelReq);
@@ -718,6 +781,11 @@ public:
             }
         }
         j["equipment"] = eq;
+        if (!knownRecipes_.empty()) {
+            json krArr = json::array();
+            for (const auto& r : knownRecipes_) krArr.push_back(r);
+            j["knownRecipes"] = krArr;
+        }
         return j.dump(4);
     }
 
@@ -728,6 +796,7 @@ public:
 
         items_.clear();
         equipped_.clear();
+        knownRecipes_.clear();
         totalWeight_ = 0;
 
         if (!j.contains("items") || !j["items"].is_array())
@@ -761,6 +830,11 @@ public:
                     }
                 }
             }
+        }
+
+        if (j.contains("knownRecipes") && j["knownRecipes"].is_array()) {
+            for (const auto& r : j["knownRecipes"])
+                knownRecipes_.insert(r.get<std::string>());
         }
 
         if (items_.size() > slotLimit_)
@@ -810,6 +884,7 @@ private:
 
     std::vector<Item> items_;
     std::unordered_map<EquipSlot, std::unique_ptr<Item>> equipped_;
+    std::unordered_set<std::string> knownRecipes_;
 
     // Returns the preferred slot; for Ring1/Ring2 the caller may promote to Ring2.
     EquipSlot slotForItem(const Item& it) const {
