@@ -16,10 +16,11 @@
  *  3) Item data structures (type‑erased) + JSON conversions
  *====================================================================*/
 struct WeaponData {
-    int damage{0};
-    int durability{-1};     // current; -1 = indestructible
-    int maxDurability{-1};  // -1 = indestructible
-    int weight{0};
+    int        damage{0};
+    int        durability{-1};
+    int        maxDurability{-1};
+    int        weight{0};
+    WeaponType weaponType{WeaponType::OneHanded};
 };
 struct ArmorData {
     int defense{0};
@@ -40,13 +41,16 @@ struct MiscData {
 };
 
 inline void to_json(json& j, const WeaponData& w){
-    j = json{{"damage",w.damage},{"durability",w.durability},{"maxDurability",w.maxDurability},{"weight",w.weight}};
+    j = json{{"damage",w.damage},{"durability",w.durability},
+             {"maxDurability",w.maxDurability},{"weight",w.weight},
+             {"weaponType",toString(w.weaponType)}};
 }
 inline void from_json(const json& j, WeaponData& w){
     w.damage        = j.value("damage",0);
     w.durability    = j.value("durability",-1);
     w.maxDurability = j.value("maxDurability", w.durability);
     w.weight        = j.value("weight",0);
+    w.weaponType    = stringToWeaponType(j.value("weaponType", std::string{"OneHanded"}));
 }
 
 inline void to_json(json& j, const ArmorData& a){
@@ -175,7 +179,7 @@ struct Item {
         std::visit([&](auto&& d) {
             using T = std::decay_t<decltype(d)>;
             if constexpr (std::is_same_v<T, WeaponData>) {
-                ss << " [DMG:" << d.damage;
+                ss << " [" << toString(d.weaponType) << " DMG:" << d.damage;
                 if (d.maxDurability >= 0)
                     ss << " DUR:" << d.durability << "/" << d.maxDurability;
                 ss << "]";

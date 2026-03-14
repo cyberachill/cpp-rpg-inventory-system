@@ -5,11 +5,28 @@
 /*======================================================================
  *  2) Core enums & helpers
  *====================================================================*/
-enum class ItemType   { Weapon, Armor, Consumable, Material, Misc };
+enum class ItemType    { Weapon, Armor, Consumable, Material, Misc };
+enum class WeaponType  { OneHanded, TwoHanded, Ranged, Shield, Unarmed };
 enum class EquipSlot  { Head, Chest, Legs, Feet, Hands, Weapon, Shield, Ring1, Ring2, Accessory, None };
 enum class Rarity     { Common, Uncommon, Rare, Epic, Legendary };
 enum class Stat       { Attack, Defense, Health, Mana, MaxHP, Speed, CritChance };
 
+inline std::string toString(WeaponType w) {
+    switch (w) {
+        case WeaponType::TwoHanded: return "TwoHanded";
+        case WeaponType::Ranged:    return "Ranged";
+        case WeaponType::Shield:    return "Shield";
+        case WeaponType::Unarmed:   return "Unarmed";
+        default:                    return "OneHanded";
+    }
+}
+inline WeaponType stringToWeaponType(const std::string& s) {
+    if (s == "TwoHanded") return WeaponType::TwoHanded;
+    if (s == "Ranged")    return WeaponType::Ranged;
+    if (s == "Shield")    return WeaponType::Shield;
+    if (s == "Unarmed")   return WeaponType::Unarmed;
+    return WeaponType::OneHanded;
+}
 inline std::string toString(ItemType t) {
     switch (t) {
         case ItemType::Weapon:     return "Weapon";

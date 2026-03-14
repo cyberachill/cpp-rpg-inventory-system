@@ -149,7 +149,27 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
-    "data": { "damage": 2, "durability": 150, "maxDurability": 150, "weight": 7 }
+    "data": { "damage": 2, "durability": 150, "maxDurability": 150, "weight": 7, "weaponType": "Shield" }
+  },
+  {
+    "id": "great_sword",
+    "name": "Great Sword",
+    "type": "Weapon",
+    "rarity": "Rare",
+    "levelReq": 4,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "damage": 22, "durability": 140, "maxDurability": 140, "weight": 12, "weaponType": "TwoHanded" }
+  },
+  {
+    "id": "war_bow",
+    "name": "War Bow",
+    "type": "Weapon",
+    "rarity": "Uncommon",
+    "levelReq": 3,
+    "stackSize": 1,
+    "maxStack": 1,
+    "data": { "damage": 15, "durability": 90, "maxDurability": 90, "weight": 5, "weaponType": "Ranged" }
   },
 
   /* ---------- ARMOR ---------- */
