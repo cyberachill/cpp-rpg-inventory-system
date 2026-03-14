@@ -197,6 +197,72 @@ public:
     }
 
     // -----------------------------------------------------------------
+    //  Enchantment
+    // -----------------------------------------------------------------
+    // Apply a random enchantment from an enchanting stone to a target item.
+    // Consumes one enchanting stone from the bag on success.
+    Result<void> enchantItem(const std::string& targetId,
+                             const std::string& stoneId,
+                             std::mt19937& rng) {
+        // locate stone
+        auto stoneIt = std::find_if(items_.begin(), items_.end(),
+            [&](const Item& i){ return i.id == stoneId; });
+        if (stoneIt == items_.end())
+            return Result<void>::err("enchanting stone '" + stoneId + "' not in inventory");
+        // enchantment stones are Misc items with a special id prefix
+        if (stoneIt->type != ItemType::Misc)
+            return Result<void>::err("'" + stoneId + "' is not an enchanting stone");
+
+        // locate target (bag or equipped)
+        Item* target = nullptr;
+        for (auto& item : items_)
+            if (item.id == targetId) { target = &item; break; }
+        if (!target) {
+            for (auto& [slot, ptr] : equipped_)
+                if (ptr && ptr->id == targetId) { target = ptr.get(); break; }
+        }
+        if (!target)
+            return Result<void>::err("item '" + targetId + "' not found");
+        if (target->type == ItemType::Material || target->type == ItemType::Consumable)
+            return Result<void>::err("cannot enchant materials or consumables");
+
+        // determine power tier from stone id
+        bool advanced = (stoneId.find("advanced") != std::string::npos ||
+                         stoneId.find("crystal")  != std::string::npos);
+        int valMin = advanced ? 4 : 1;
+        int valMax = advanced ? 9 : 4;
+
+        static const std::array<Stat, 4> stats{
+            Stat::Attack, Stat::Defense, Stat::Health, Stat::Mana};
+        static const std::array<std::string, 5> elements{
+            "", "Fire", "Ice", "Lightning", "Poison"};
+        static const std::array<std::string, 8> suffixes{
+            "of the Bear", "of the Fox", "of the Eagle",
+            "of Power",    "of the Sage","of Warding",
+            "of the Storm","of Fortune"};
+
+        std::uniform_int_distribution<int> dv(valMin, valMax);
+        std::uniform_int_distribution<int> ds(0, 3);
+        std::uniform_int_distribution<int> de(0, 4);
+        std::uniform_int_distribution<int> dn(0, 7);
+
+        Enchantment e;
+        e.stat    = stats[static_cast<std::size_t>(ds(rng))];
+        e.value   = dv(rng);
+        e.element = elements[static_cast<std::size_t>(de(rng))];
+        e.name    = suffixes[static_cast<std::size_t>(dn(rng))];
+        target->enchantments.push_back(e);
+
+        // consume stone
+        auto rem = removeItem(stoneId, 1);
+        if (!rem) return Result<void>::err("failed to consume stone: " + rem.error());
+
+        Log::info("Enchanted '" + targetId + "' with +" + std::to_string(e.value)
+                  + " " + toString(e.stat));
+        return Result<void>::ok();
+    }
+
+    // -----------------------------------------------------------------
     //  Durability management
     // -----------------------------------------------------------------
     Result<void> degradeEquipped(EquipSlot slot, int amount = 1) {

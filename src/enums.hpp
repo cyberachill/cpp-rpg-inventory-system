@@ -55,6 +55,22 @@ inline std::string toString(EquipSlot s) {
         default:                    return "None";
     }
 }
+inline std::string toString(Stat s) {
+    switch (s) {
+        case Stat::Attack:  return "Attack";
+        case Stat::Defense: return "Defense";
+        case Stat::Health:  return "Health";
+        case Stat::Mana:    return "Mana";
+        default:            return "Unknown";
+    }
+}
+inline Stat stringToStat(const std::string& s) {
+    if (s == "Attack")  return Stat::Attack;
+    if (s == "Defense") return Stat::Defense;
+    if (s == "Health")  return Stat::Health;
+    if (s == "Mana")    return Stat::Mana;
+    return Stat::Attack;
+}
 inline std::string rarityColor(Rarity r) {
     switch (r) {
         case Rarity::Common:    return "\x1B[37m";

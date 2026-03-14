@@ -248,5 +248,27 @@
     "stackSize": 1,
     "maxStack": 5,
     "data": { "repairAmount": 80, "weight": 1 }
+  },
+
+  /* ---------- ENCHANTING STONES ---------- */
+  {
+    "id": "enchanting_stone",
+    "name": "Enchanting Stone",
+    "type": "Misc",
+    "rarity": "Uncommon",
+    "levelReq": 1,
+    "stackSize": 1,
+    "maxStack": 10,
+    "data": { "repairAmount": 0, "weight": 1 }
+  },
+  {
+    "id": "enchanting_crystal",
+    "name": "Enchanting Crystal",
+    "type": "Misc",
+    "rarity": "Rare",
+    "levelReq": 5,
+    "stackSize": 1,
+    "maxStack": 5,
+    "data": { "repairAmount": 0, "weight": 1 }
   }
 ]
