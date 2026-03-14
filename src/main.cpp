@@ -72,6 +72,7 @@ int main() {
         std::cout << "22) Sort inventory (name/type/rarity/weight)\n";
         std::cout << "23) Filter inventory\n";
         std::cout << "24) Split stack\n";
+        std::cout << "25) Compare item to equipped\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -333,6 +334,13 @@ int main() {
                 auto res = inv.splitStack(static_cast<std::size_t>(slotNum - 1), splitAmt);
                 if (!res) std::cout << "Split failed: " << res.error() << "\n";
                 else      std::cout << "Stack split successfully.\n";
+                break;
+            }
+            case 25: {  // compare item to equipped
+                std::cout << "Enter item id to compare: ";
+                std::string cmpId;
+                std::getline(std::cin, cmpId);
+                inv.compareToEquipped(cmpId);
                 break;
             }
             case 21: {  // use consumable

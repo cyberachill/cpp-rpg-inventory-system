@@ -263,6 +263,75 @@ public:
     }
 
     // -----------------------------------------------------------------
+    //  Item comparison
+    // -----------------------------------------------------------------
+    // Prints a side-by-side stat delta between the bag item `id` and
+    // whatever is currently equipped in its natural slot.
+    void compareToEquipped(const std::string& id) const {
+        const Item* candidate = nullptr;
+        for (const auto& item : items_)
+            if (item.id == id) { candidate = &item; break; }
+        if (!candidate) {
+            std::cout << "  Item '" << id << "' not found in inventory.\n";
+            return;
+        }
+
+        EquipSlot slot = const_cast<Inventory*>(this)->slotForItem(*candidate);
+        if (slot == EquipSlot::None) {
+            std::cout << "  '" << candidate->name << "' cannot be equipped.\n";
+            return;
+        }
+
+        const Item* current = getEquipped(slot);
+
+        std::cout << "\n  \x1B[1m[Compare] " << candidate->getDescription() << "\x1B[0m\n";
+        if (!current) {
+            std::cout << "  " << toString(slot) << " slot is empty (nothing to compare).\n";
+        } else {
+            std::cout << "  vs  " << current->getDescription() << "\n";
+        }
+
+        // Stat delta helper
+        auto printDelta = [](const std::string& label, int newVal, int oldVal) {
+            int delta = newVal - oldVal;
+            if (delta == 0) return;
+            std::string col = (delta > 0) ? "\x1B[32m" : "\x1B[31m";
+            std::string sign = (delta > 0) ? "+" : "";
+            std::cout << "    " << label << ": " << col
+                      << sign << delta << " (" << oldVal << " → " << newVal
+                      << ")\x1B[0m\n";
+        };
+
+        int newDmg = 0, curDmg = 0, newDef = 0, curDef = 0;
+        int newDur = 0, curDur = 0, newWgt = 0, curWgt = 0;
+
+        if (const auto* wd = std::get_if<WeaponData>(&candidate->data)) {
+            newDmg = wd->damage; newDur = wd->durability; newWgt = wd->weight; }
+        if (const auto* ad = std::get_if<ArmorData>(&candidate->data)) {
+            newDef = ad->defense; newDur = ad->durability; newWgt = ad->weight; }
+        if (current) {
+            if (const auto* wd = std::get_if<WeaponData>(&current->data)) {
+                curDmg = wd->damage; curDur = wd->durability; curWgt = wd->weight; }
+            if (const auto* ad = std::get_if<ArmorData>(&current->data)) {
+                curDef = ad->defense; curDur = ad->durability; curWgt = ad->weight; }
+        }
+
+        if (newDmg || curDmg)  printDelta("Damage",    newDmg, curDmg);
+        if (newDef || curDef)  printDelta("Defense",   newDef, curDef);
+        if (newDur || curDur)  printDelta("Durability",newDur, curDur);
+        printDelta("Weight", newWgt, curWgt);
+
+        // Enchantment count delta
+        int newEnc = static_cast<int>(candidate->enchantments.size());
+        int curEnc = current ? static_cast<int>(current->enchantments.size()) : 0;
+        if (newEnc != curEnc) {
+            std::string col = (newEnc > curEnc) ? "\x1B[32m" : "\x1B[31m";
+            std::cout << "    Enchantments: " << col
+                      << curEnc << " → " << newEnc << "\x1B[0m\n";
+        }
+    }
+
+    // -----------------------------------------------------------------
     //  Inventory UX — sort, filter, stack split
     // -----------------------------------------------------------------
     enum class SortKey { Name, Type, Rarity, Weight };
