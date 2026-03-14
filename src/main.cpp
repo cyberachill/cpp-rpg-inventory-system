@@ -1,6 +1,7 @@
 #include "inventory.hpp"
 #include "item_factory.hpp"
 #include "crafting.hpp"
+#include "shop.hpp"
 #include "logger.hpp"
 
 #include <iostream>
@@ -13,7 +14,9 @@ int main() {
     Log::setFile("game.log");               // isteğe bağlı dosya logu
     ItemFactory   factory;
     CraftingSystem crafting;
+    Shop          shop;
     std::mt19937  rng(std::random_device{}());
+    int           playerGold = 200;
 
     if (auto r = factory.loadTemplates("templates.json"); !r) {
         Log::error("Cannot continue without item templates: " + r.error());
@@ -26,10 +29,11 @@ int main() {
 
     Inventory inv(30, 300);                  // 30 slot, 300 ağırlık limiti
     int playerLevel = 5;
+    shop.stockFromFactory(factory, playerLevel);
 
     while (true) {
         std::cout << "\n--- MENU ---------------------------------------------------\n";
-        std::cout << "1) Show inventory\n";
+        std::cout << "1) Show inventory  [Gold: " << playerGold << "g]\n";
         std::cout << "2) Show equipment\n";
         std::cout << "3) Add random loot\n";
         std::cout << "4) Craft item\n";
@@ -40,6 +44,9 @@ int main() {
         std::cout << "9) Strike with weapon (degrades it)\n";
         std::cout << "10) Use repair kit\n";
         std::cout << "11) Enchant item\n";
+        std::cout << "12) Visit shop (browse / buy)\n";
+        std::cout << "13) Sell item\n";
+        std::cout << "14) Restock shop\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -173,6 +180,47 @@ int main() {
                 auto res = inv.useRepairKit(kitId, targetId);
                 if (!res) std::cout << "Repair failed: " << res.error() << "\n";
                 else      std::cout << "Item repaired successfully.\n";
+                break;
+            }
+            case 12: {  // shop browse / buy
+                std::cout << "\n--- SHOP (Gold: " << playerGold << "g) ---\n";
+                shop.printStock();
+                std::cout << "Enter item number to buy (0 to cancel): ";
+                int idx;
+                std::cin >> idx;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                if (idx > 0) {
+                    auto res = shop.buy(static_cast<std::size_t>(idx - 1), inv, playerGold);
+                    if (!res) std::cout << "Buy failed: " << res.error() << "\n";
+                    else      std::cout << "Purchased! Gold remaining: " << playerGold << "g\n";
+                }
+                break;
+            }
+            case 13: {  // sell
+                std::cout << "Enter item id to sell: ";
+                std::string sid;
+                std::getline(std::cin, sid);
+                // preview price first
+                const auto& items = inv.getItems();
+                auto pit = std::find_if(items.begin(), items.end(),
+                    [&](const Item& i){ return i.id == sid; });
+                if (pit != items.end()) {
+                    std::cout << "Sell price: " << shop.sellPrice(*pit) << "g — confirm? (y/n): ";
+                    char c; std::cin >> c;
+                    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    if (c == 'y' || c == 'Y') {
+                        auto res = shop.sell(sid, inv, playerGold);
+                        if (!res) std::cout << "Sell failed: " << res.error() << "\n";
+                        else      std::cout << "Sold! Gold: " << playerGold << "g\n";
+                    }
+                } else {
+                    std::cout << "Item not found in inventory.\n";
+                }
+                break;
+            }
+            case 14: {  // restock
+                shop.stockFromFactory(factory, playerLevel);
+                std::cout << "Shop restocked with new items.\n";
                 break;
             }
             default:
