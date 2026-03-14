@@ -5,6 +5,7 @@
 #include "loot_table.hpp"
 #include "set_bonus.hpp"
 #include "player.hpp"
+#include "combat.hpp"
 #include "logger.hpp"
 
 #include <iostream>
@@ -21,6 +22,7 @@ int main() {
     Shop             shop;
     LootTableManager lootMgr;
     SetBonusManager  setMgr;
+    CombatEngine     combat;
     std::mt19937     rng(std::random_device{}());
     int              playerGold = 200;
 
@@ -43,7 +45,7 @@ int main() {
     Player    player(5);                     // level 5
 
     // Pre-seed basic recipes every crafter knows from the start
-    for (const std::string& r : {
+    for (const char* r : {
         "iron_ingot", "steel_ingot", "gold_ingot",
         "health_potion", "repair_kit_basic",
         "enchanting_stone", "iron_sword"
@@ -85,6 +87,7 @@ int main() {
         std::cout << "27) Upgrade item (costs 3x upgrade_stone)\n";
         std::cout << "28) Use recipe scroll\n";
         std::cout << "29) Show known recipes\n";
+        std::cout << "30) Start encounter\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -379,6 +382,38 @@ int main() {
                 auto res = inv.splitStack(static_cast<std::size_t>(slotNum - 1), splitAmt);
                 if (!res) std::cout << "Split failed: " << res.error() << "\n";
                 else      std::cout << "Stack split successfully.\n";
+                break;
+            }
+            case 30: {  // encounter
+                static const auto catalogue = enemyCatalogue();
+                std::cout << "Choose enemy:\n";
+                for (std::size_t i = 0; i < catalogue.size(); ++i)
+                    std::cout << "  " << i + 1 << ") " << catalogue[i].name
+                              << " (HP:" << catalogue[i].hp
+                              << " ATK:" << catalogue[i].attack << ")\n";
+                std::cout << "  0) Cancel\n> ";
+                int eidx;
+                std::cin >> eidx;
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                if (eidx < 1 || eidx > static_cast<int>(catalogue.size())) break;
+
+                Enemy enemy = catalogue[static_cast<std::size_t>(eidx - 1)];
+                auto cr = combat.runEncounter(
+                    enemy, player, inv, setMgr, lootMgr, factory, rng);
+
+                if (cr.playerWon) {
+                    playerGold += cr.goldGained;
+                    if (!cr.lootDropped.empty()) {
+                        std::cout << "  Loot:\n";
+                        for (auto& item : cr.lootDropped) {
+                            auto addRes = inv.addItem(item);
+                            if (!addRes)
+                                std::cout << "  (no space) " << item.getDescription() << "\n";
+                            else
+                                std::cout << "  + " << item.getDescription() << "\n";
+                        }
+                    }
+                }
                 break;
             }
             case 28: {  // use recipe scroll
