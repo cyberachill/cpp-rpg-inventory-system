@@ -128,5 +128,22 @@
       "leather": 2,
       "gem": 1
     }
+  },
+
+  {
+    "resultId": "enchanting_stone",
+    "resultCount": 2,
+    "ingredients": {
+      "gem": 1,
+      "gold_ingot": 1
+    }
+  },
+  {
+    "resultId": "enchanting_crystal",
+    "resultCount": 1,
+    "ingredients": {
+      "gem": 3,
+      "gold_ingot": 2
+    }
   }
 ]

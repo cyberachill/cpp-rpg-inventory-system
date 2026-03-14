@@ -7,11 +7,13 @@
 #include <fstream>
 #include <limits>
 #include <string>
+#include <random>
 
 int main() {
     Log::setFile("game.log");               // isteğe bağlı dosya logu
     ItemFactory   factory;
     CraftingSystem crafting;
+    std::mt19937  rng(std::random_device{}());
 
     if (auto r = factory.loadTemplates("templates.json"); !r) {
         Log::error("Cannot continue without item templates: " + r.error());
@@ -37,6 +39,7 @@ int main() {
         std::cout << "8) Load game\n";
         std::cout << "9) Strike with weapon (degrades it)\n";
         std::cout << "10) Use repair kit\n";
+        std::cout << "11) Enchant item\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -146,6 +149,18 @@ int main() {
                     const Item* w = inv.getEquipped(EquipSlot::Weapon);
                     if (w) std::cout << "  " << w->getDescription() << "\n";
                 }
+                break;
+            }
+            case 11: {  // enchant
+                std::cout << "Enter enchanting stone id (e.g. enchanting_stone): ";
+                std::string stoneId;
+                std::getline(std::cin, stoneId);
+                std::cout << "Enter item id to enchant: ";
+                std::string targetId;
+                std::getline(std::cin, targetId);
+                auto res = inv.enchantItem(targetId, stoneId, rng);
+                if (!res) std::cout << "Enchant failed: " << res.error() << "\n";
+                else      std::cout << "Enchantment applied!\n";
                 break;
             }
             case 10: {  // tamir kiti kullan

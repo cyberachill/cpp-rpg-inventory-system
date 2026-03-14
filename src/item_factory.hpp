@@ -55,6 +55,12 @@ public:
             result.maxStack = 1;
         }
 
+        // add enchantments for equippable items based on rarity
+        if (result.type == ItemType::Weapon || result.type == ItemType::Armor) {
+            int count = enchantCountForRarity(result.rarity);
+            addRandomEnchantments(result, count);
+        }
+
         return Result<Item>::ok(std::move(result));
     }
 
@@ -124,6 +130,42 @@ private:
             case Rarity::Epic:      return "Epic";
             case Rarity::Legendary: return "Legendary";
             default:                return "";
+        }
+    }
+
+    // How many enchantments to roll for a given rarity
+    int enchantCountForRarity(Rarity r) {
+        switch (r) {
+            case Rarity::Common:    return 0;
+            case Rarity::Uncommon:  return (randInt(1, 100) <= 40) ? 1 : 0; // 40% chance
+            case Rarity::Rare:      return 1;
+            case Rarity::Epic:      return randInt(1, 2);
+            case Rarity::Legendary: return randInt(2, 3);
+            default:                return 0;
+        }
+    }
+
+    void addRandomEnchantments(Item& item, int count) {
+        static const std::array<Stat, 4> stats{
+            Stat::Attack, Stat::Defense, Stat::Health, Stat::Mana};
+        static const std::array<std::string, 5> elements{
+            "", "Fire", "Ice", "Lightning", "Poison"};
+        static const std::array<std::string, 8> suffixes{
+            "of the Bear", "of the Fox", "of the Eagle",
+            "of Power",    "of the Sage","of Warding",
+            "of the Storm","of Fortune"};
+
+        int rarityTier = static_cast<int>(item.rarity); // 0..4
+        int baseMin = 1 + rarityTier;
+        int baseMax = 3 + rarityTier * 2;
+
+        for (int i = 0; i < count; ++i) {
+            Enchantment e;
+            e.stat    = stats[static_cast<std::size_t>(randInt(0, 3))];
+            e.value   = randInt(baseMin, baseMax);
+            e.element = elements[static_cast<std::size_t>(randInt(0, 4))];
+            e.name    = suffixes[static_cast<std::size_t>(randInt(0, 7))];
+            item.enchantments.push_back(std::move(e));
         }
     }
 };

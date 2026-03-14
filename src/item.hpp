@@ -3,12 +3,14 @@
 #include "json.hpp"
 #include "enums.hpp"
 #include "result.hpp"
+#include "enchantment.hpp"
 
 #include <variant>
 #include <string>
 #include <sstream>
 #include <cassert>
 #include <algorithm>
+#include <vector>
 
 /*======================================================================
  *  3) Item data structures (type‑erased) + JSON conversions
@@ -97,6 +99,7 @@ struct Item {
     int        stackSize{1};
     int        maxStack{1};
     ItemPayload data;
+    std::vector<Enchantment> enchantments;  // stat bonuses applied to this instance
 
     [[nodiscard]] int getWeight() const {
         struct Visitor {
@@ -191,6 +194,7 @@ struct Item {
                     ss << " [REPAIR:" << d.repairAmount << "]";
             }
         }, data);
+        ss << enchantmentLine(enchantments);
         return ss.str();
     }
 
@@ -213,6 +217,15 @@ inline void to_json(json& j, const Item& i){
         {"maxStack", i.maxStack}
     };
     std::visit([&j](auto&& d){ j["data"] = d; }, i.data);
+    if (!i.enchantments.empty()) {
+        json encArr = json::array();
+        for (const auto& e : i.enchantments) {
+            json je;
+            to_json(je, e);
+            encArr.push_back(std::move(je));
+        }
+        j["enchantments"] = encArr;
+    }
 }
 inline void from_json(const json& j, Item& i){
     i.id        = j.at("id").get<std::string>();
@@ -229,6 +242,14 @@ inline void from_json(const json& j, Item& i){
         case ItemType::Consumable:  i.data = d.get<ConsumableData>();  break;
         case ItemType::Material:    i.data = d.get<MaterialData>();    break;
         default:                    i.data = d.get<MiscData>();        break;
+    }
+    i.enchantments.clear();
+    if (j.contains("enchantments") && j["enchantments"].is_array()) {
+        for (const auto& je : j["enchantments"]) {
+            Enchantment e{};
+            from_json(je, e);
+            i.enchantments.push_back(std::move(e));
+        }
     }
 }
 
