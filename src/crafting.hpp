@@ -34,8 +34,8 @@ inline void from_json(const json& j, Recipe& r){
     if (!ing.is_object())
         throw std::runtime_error("ingredients must be an object");
     r.ingredients.clear();
-    for (auto it = ing.object_begin(); it != ing.object_end(); ++it) {
-        r.ingredients[it.key()] = it.value().get<int>();
+    for (auto& [key, val] : ing.items()) {
+        r.ingredients[key] = val.get<int>();
     }
 }
 
@@ -46,7 +46,7 @@ public:
         if (!in) return Result<void>::err("Cannot open recipe file '" + path + "'");
         std::string content((std::istreambuf_iterator<char>(in)), {});
         json j;
-        try { j = json::parse(content); }
+        try { j = json_parse(content); }
         catch (const std::exception& e) { return Result<void>::err("JSON parse error: " + std::string(e.what())); }
 
         if (!j.is_array())
@@ -54,7 +54,8 @@ public:
 
         for (const auto& elem : j) {
             try {
-                Recipe rec = elem.get<Recipe>();
+                Recipe rec{};
+                from_json(elem, rec);
                 recipes_[rec.resultId] = rec;
             } catch (const std::exception& e) {
                 Log::warn("Failed to parse recipe: " + std::string(e.what()));

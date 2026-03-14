@@ -110,5 +110,23 @@
       "gold_ingot": 2,
       "gem": 2
     }
+  },
+
+  {
+    "resultId": "repair_kit_basic",
+    "resultCount": 2,
+    "ingredients": {
+      "leather": 2,
+      "iron_ingot": 1
+    }
+  },
+  {
+    "resultId": "repair_kit_advanced",
+    "resultCount": 1,
+    "ingredients": {
+      "steel_ingot": 1,
+      "leather": 2,
+      "gem": 1
+    }
   }
 ]
