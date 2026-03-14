@@ -3,6 +3,7 @@
 #include "crafting.hpp"
 #include "shop.hpp"
 #include "loot_table.hpp"
+#include "set_bonus.hpp"
 #include "logger.hpp"
 
 #include <iostream>
@@ -18,6 +19,7 @@ int main() {
     CraftingMastery  mastery;
     Shop             shop;
     LootTableManager lootMgr;
+    SetBonusManager  setMgr;
     std::mt19937     rng(std::random_device{}());
     int              playerGold = 200;
 
@@ -32,6 +34,9 @@ int main() {
     // loot tables are optional — warn but continue if missing
     if (auto r = lootMgr.loadFromFile("loot_tables.json"); !r)
         Log::warn("Loot tables not loaded: " + r.error());
+    // set bonuses are optional — warn but continue if missing
+    if (auto r = setMgr.loadFromFile("set_bonuses.json"); !r)
+        Log::warn("Set bonuses not loaded: " + r.error());
 
     Inventory inv(30, 300);                  // 30 slot, 300 ağırlık limiti
     int playerLevel = 5;
@@ -56,6 +61,8 @@ int main() {
         std::cout << "15) Open loot table (goblin/bandit/dungeon_chest/dragon_hoard)\n";
         std::cout << "16) Show crafting mastery\n";
         std::cout << "17) List all recipes\n";
+        std::cout << "18) Show active set bonuses\n";
+        std::cout << "19) List all armor sets\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -268,6 +275,16 @@ int main() {
             case 17: {  // list recipes
                 std::cout << "\n--- Recipes ---\n";
                 crafting.listRecipes();
+                break;
+            }
+            case 18: {  // active set bonuses
+                std::cout << "\n--- Active Set Bonuses ---\n";
+                setMgr.printActiveBonuses(inv);
+                break;
+            }
+            case 19: {  // list all sets
+                std::cout << "\n--- All Armor Sets ---\n";
+                setMgr.printAllSets();
                 break;
             }
             default:

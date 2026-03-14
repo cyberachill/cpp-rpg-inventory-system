@@ -100,6 +100,7 @@ struct Item {
     int        maxStack{1};
     ItemPayload data;
     std::vector<Enchantment> enchantments;  // stat bonuses applied to this instance
+    std::string setId;                       // armor set membership; empty = no set
 
     [[nodiscard]] int getWeight() const {
         struct Visitor {
@@ -195,6 +196,8 @@ struct Item {
             }
         }, data);
         ss << enchantmentLine(enchantments);
+        if (!setId.empty())
+            ss << " \x1B[33m[Set:" << setId << "]\x1B[0m";
         return ss.str();
     }
 
@@ -217,6 +220,8 @@ inline void to_json(json& j, const Item& i){
         {"maxStack", i.maxStack}
     };
     std::visit([&j](auto&& d){ j["data"] = d; }, i.data);
+    if (!i.setId.empty())
+        j["setId"] = i.setId;
     if (!i.enchantments.empty()) {
         json encArr = json::array();
         for (const auto& e : i.enchantments) {
@@ -243,6 +248,7 @@ inline void from_json(const json& j, Item& i){
         case ItemType::Material:    i.data = d.get<MaterialData>();    break;
         default:                    i.data = d.get<MiscData>();        break;
     }
+    i.setId = j.value("setId", std::string{});
     i.enchantments.clear();
     if (j.contains("enchantments") && j["enchantments"].is_array()) {
         for (const auto& je : j["enchantments"]) {
