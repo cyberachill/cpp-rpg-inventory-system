@@ -1,0 +1,47 @@
+[
+  {
+    "id": "iron_set",
+    "name": "Iron Warrior Set",
+    "thresholds": [
+      {
+        "piecesRequired": 2,
+        "description": "Ironclad stance: +5 Defense, +10 Max Durability bonus",
+        "bonuses": [
+          { "stat": "Defense", "value": 5, "element": "", "name": "Ironclad Stance" }
+        ]
+      },
+      {
+        "piecesRequired": 3,
+        "description": "Full Iron Mastery: +10 Defense, +15 Attack, +20 HP",
+        "bonuses": [
+          { "stat": "Defense", "value": 10, "element": "", "name": "Iron Mastery" },
+          { "stat": "Attack",  "value": 15, "element": "", "name": "Iron Might" },
+          { "stat": "MaxHP",   "value": 20, "element": "", "name": "Iron Constitution" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shadow_set",
+    "name": "Shadow Rogue Set",
+    "thresholds": [
+      {
+        "piecesRequired": 2,
+        "description": "Shadow Step: +10 Speed, +5 Attack",
+        "bonuses": [
+          { "stat": "Speed",  "value": 10, "element": "Shadow", "name": "Shadow Step" },
+          { "stat": "Attack", "value": 5,  "element": "Shadow", "name": "Rogue Blade"  }
+        ]
+      },
+      {
+        "piecesRequired": 3,
+        "description": "Full Shadow Mastery: +20 Speed, +15 Attack, +10 CritChance",
+        "bonuses": [
+          { "stat": "Speed",      "value": 20, "element": "Shadow", "name": "Shadow Mastery" },
+          { "stat": "Attack",     "value": 15, "element": "Shadow", "name": "Assassin Edge"  },
+          { "stat": "CritChance", "value": 10, "element": "Shadow", "name": "Shadow Strike"  }
+        ]
+      }
+    ]
+  }
+]

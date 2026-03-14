@@ -161,6 +161,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
+    "setId": "iron_set",
     "data": { "defense": 3, "durability": 60, "maxDurability": 60, "weight": 4 }
   },
   {
@@ -171,6 +172,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
+    "setId": "iron_set",
     "data": { "defense": 5, "durability": 100, "maxDurability": 100, "weight": 8 }
   },
   {
@@ -181,6 +183,7 @@
     "levelReq": 1,
     "stackSize": 1,
     "maxStack": 1,
+    "setId": "iron_set",
     "data": { "defense": 4, "durability": 80, "maxDurability": 80, "weight": 6 }
   },
 
