@@ -15,6 +15,7 @@ int main() {
     Log::setFile("game.log");               // isteğe bağlı dosya logu
     ItemFactory      factory;
     CraftingSystem   crafting;
+    CraftingMastery  mastery;
     Shop             shop;
     LootTableManager lootMgr;
     std::mt19937     rng(std::random_device{}());
@@ -53,6 +54,8 @@ int main() {
         std::cout << "13) Sell item\n";
         std::cout << "14) Restock shop\n";
         std::cout << "15) Open loot table (goblin/bandit/dungeon_chest/dragon_hoard)\n";
+        std::cout << "16) Show crafting mastery\n";
+        std::cout << "17) List all recipes\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -97,9 +100,14 @@ int main() {
                 std::cout << "Enter recipe result id (e.g. iron_sword): ";
                 std::string rid;
                 std::getline(std::cin, rid);
-                auto craftRes = inv.craft(rid, factory, crafting, playerLevel);
-                if (!craftRes) std::cout << "Craft failed: " << craftRes.error() << "\n";
-                else           std::cout << "Craft succeeded!\n";
+                auto cr = inv.craft(rid, factory, crafting, mastery, rng, playerLevel);
+                if (!cr.success) {
+                    std::cout << "Craft failed: " << cr.errorMsg << "\n";
+                } else {
+                    std::cout << qualityColor(cr.quality) << "[" << toString(cr.quality) << "]"
+                              << resetColor() << " Crafted successfully!\n";
+                    if (cr.leveledUp) std::cout << "  Crafting mastery leveled up!\n";
+                }
                 break;
             }
             case 5: {   // ekipana tak
@@ -250,6 +258,16 @@ int main() {
             case 14: {  // restock
                 shop.stockFromFactory(factory, playerLevel);
                 std::cout << "Shop restocked with new items.\n";
+                break;
+            }
+            case 16: {  // show mastery
+                std::cout << "\n--- Crafting Mastery ---\n";
+                mastery.print();
+                break;
+            }
+            case 17: {  // list recipes
+                std::cout << "\n--- Recipes ---\n";
+                crafting.listRecipes();
                 break;
             }
             default:
