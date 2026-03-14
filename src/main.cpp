@@ -4,6 +4,7 @@
 #include "shop.hpp"
 #include "loot_table.hpp"
 #include "set_bonus.hpp"
+#include "player.hpp"
 #include "logger.hpp"
 
 #include <iostream>
@@ -39,12 +40,15 @@ int main() {
         Log::warn("Set bonuses not loaded: " + r.error());
 
     Inventory inv(30, 300);                  // 30 slot, 300 ağırlık limiti
-    int playerLevel = 5;
-    shop.stockFromFactory(factory, playerLevel);
+    Player    player(5);                     // level 5
+    shop.stockFromFactory(factory, player.level());
 
     while (true) {
         std::cout << "\n--- MENU ---------------------------------------------------\n";
-        std::cout << "1) Show inventory  [Gold: " << playerGold << "g]\n";
+        auto curStats = player.computeStats(inv, setMgr);
+        std::cout << "1) Show inventory  [Gold: " << playerGold << "g | HP: "
+                  << player.currentHP() << "/" << curStats.maxHP << " | ATK: "
+                  << curStats.attack << " | DEF: " << curStats.defense << "]\n";
         std::cout << "2) Show equipment\n";
         std::cout << "3) Add random loot\n";
         std::cout << "4) Craft item\n";
@@ -63,6 +67,8 @@ int main() {
         std::cout << "17) List all recipes\n";
         std::cout << "18) Show active set bonuses\n";
         std::cout << "19) List all armor sets\n";
+        std::cout << "20) Character sheet\n";
+        std::cout << "21) Use consumable\n";
         std::cout << "0) Exit\n";
         std::cout << "Choice: ";
         int choice;
@@ -93,7 +99,7 @@ int main() {
                 break;
             }
             case 3: {   // rastgele ganimet ekle
-                auto res = factory.createRandomItem(playerLevel);
+                auto res = factory.createRandomItem(player.level());
                 if (!res) {
                     std::cout << "Factory error: " << res.error() << "\n";
                     break;
@@ -107,7 +113,7 @@ int main() {
                 std::cout << "Enter recipe result id (e.g. iron_sword): ";
                 std::string rid;
                 std::getline(std::cin, rid);
-                auto cr = inv.craft(rid, factory, crafting, mastery, rng, playerLevel);
+                auto cr = inv.craft(rid, factory, crafting, mastery, rng, player.level());
                 if (!cr.success) {
                     std::cout << "Craft failed: " << cr.errorMsg << "\n";
                 } else {
@@ -121,7 +127,7 @@ int main() {
                 std::cout << "Enter inventory item id to equip: ";
                 std::string iid;
                 std::getline(std::cin, iid);
-                auto eqRes = inv.equip(iid, playerLevel);
+                auto eqRes = inv.equip(iid, player.level());
                 if (!eqRes) std::cout << "Equip failed: " << eqRes.error() << "\n";
                 else        std::cout << "Equipped successfully.\n";
                 break;
@@ -247,7 +253,7 @@ int main() {
                     std::cout << "Unknown loot table '" << tname << "'\n";
                     break;
                 }
-                auto dropped = lootMgr.rollItems(tname, factory, rng, playerLevel);
+                auto dropped = lootMgr.rollItems(tname, factory, rng, player.level());
                 if (dropped.empty()) {
                     std::cout << "Nothing dropped.\n";
                 } else {
@@ -263,7 +269,7 @@ int main() {
                 break;
             }
             case 14: {  // restock
-                shop.stockFromFactory(factory, playerLevel);
+                shop.stockFromFactory(factory, player.level());
                 std::cout << "Shop restocked with new items.\n";
                 break;
             }
@@ -285,6 +291,25 @@ int main() {
             case 19: {  // list all sets
                 std::cout << "\n--- All Armor Sets ---\n";
                 setMgr.printAllSets();
+                break;
+            }
+            case 20: {  // character sheet
+                player.printSheet(inv, setMgr);
+                break;
+            }
+            case 21: {  // use consumable
+                std::cout << "Enter consumable id (e.g. health_potion): ";
+                std::string cid;
+                std::getline(std::cin, cid);
+                auto res = inv.useConsumable(cid);
+                if (!res) {
+                    std::cout << "Use failed: " << res.error() << "\n";
+                } else {
+                    auto stats = player.computeStats(inv, setMgr);
+                    int gained = player.applyHeal(res.value(), stats);
+                    std::cout << "Used " << cid << "! Restored " << gained << " HP. "
+                              << "HP: " << player.currentHP() << "/" << stats.maxHP << "\n";
+                }
                 break;
             }
             default:

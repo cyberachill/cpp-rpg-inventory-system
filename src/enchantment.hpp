@@ -34,11 +34,14 @@ inline void from_json(const json& j, Enchantment& e) {
 // ANSI colour per stat for display
 inline std::string statColor(Stat s) {
     switch (s) {
-        case Stat::Attack:  return "\x1B[31m"; // red
-        case Stat::Defense: return "\x1B[34m"; // blue
-        case Stat::Health:  return "\x1B[32m"; // green
-        case Stat::Mana:    return "\x1B[35m"; // purple
-        default:            return "\x1B[0m";
+        case Stat::Attack:     return "\x1B[31m"; // red
+        case Stat::Defense:    return "\x1B[34m"; // blue
+        case Stat::Health:     return "\x1B[32m"; // green
+        case Stat::Mana:       return "\x1B[35m"; // purple
+        case Stat::MaxHP:      return "\x1B[32m"; // green
+        case Stat::Speed:      return "\x1B[36m"; // cyan
+        case Stat::CritChance: return "\x1B[33m"; // yellow
+        default:               return "\x1B[0m";
     }
 }
 
